@@ -1,0 +1,54 @@
+[debug] [2024-09-10T02:57:11.978Z] ----------------------------------------------------------------------
+[debug] [2024-09-10T02:57:11.979Z] Command:       /Users/krystal/.nvm/versions/node/v18.16.0/bin/node /Users/krystal/.nvm/versions/node/v18.16.0/bin/firebase deploy --only functions --debug
+[debug] [2024-09-10T02:57:11.979Z] CLI Version:   13.16.0
+[debug] [2024-09-10T02:57:11.980Z] Platform:      darwin
+[debug] [2024-09-10T02:57:11.980Z] Node Version:  v18.16.0
+[debug] [2024-09-10T02:57:11.980Z] Time:          Tue Sep 10 2024 11:57:11 GMT+0900 (대한민국 표준시)
+[debug] [2024-09-10T02:57:11.980Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2024-09-10T02:57:12.012Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2024-09-10T02:57:12.012Z] > authorizing via signed-in user (motionbit.dev@gmail.com)
+[debug] [2024-09-10T02:57:12.012Z] [iam] checking project motionbit-doc for permissions ["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]
+[debug] [2024-09-10T02:57:12.013Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/motionbit-doc:testIamPermissions [none]
+[debug] [2024-09-10T02:57:12.013Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/motionbit-doc:testIamPermissions x-goog-quota-user=projects/motionbit-doc
+[debug] [2024-09-10T02:57:12.013Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/motionbit-doc:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]}
+[debug] [2024-09-10T02:57:12.804Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/motionbit-doc:testIamPermissions 200
+[debug] [2024-09-10T02:57:12.804Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/motionbit-doc:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]}
+[debug] [2024-09-10T02:57:12.805Z] >>> [apiv2][query] POST https://iam.googleapis.com/v1/projects/motionbit-doc/serviceAccounts/motionbit-doc@appspot.gserviceaccount.com:testIamPermissions [none]
+[debug] [2024-09-10T02:57:12.805Z] >>> [apiv2][body] POST https://iam.googleapis.com/v1/projects/motionbit-doc/serviceAccounts/motionbit-doc@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[debug] [2024-09-10T02:57:13.944Z] <<< [apiv2][status] POST https://iam.googleapis.com/v1/projects/motionbit-doc/serviceAccounts/motionbit-doc@appspot.gserviceaccount.com:testIamPermissions 200
+[debug] [2024-09-10T02:57:13.944Z] <<< [apiv2][body] POST https://iam.googleapis.com/v1/projects/motionbit-doc/serviceAccounts/motionbit-doc@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[info] 
+[info] === Deploying to 'motionbit-doc'...
+[info] 
+[info] i  deploying functions 
+[info] Running command: npm --prefix "$RESOURCE_DIR" run lint
+[error] 
+[error] Error: functions predeploy error: Command terminated with non-zero exit code 1
+[debug] [2024-09-10T02:57:37.630Z] ----------------------------------------------------------------------
+[debug] [2024-09-10T02:57:37.631Z] Command:       /Users/krystal/.nvm/versions/node/v18.16.0/bin/node /Users/krystal/.nvm/versions/node/v18.16.0/bin/firebase deploy --only functions --debug
+[debug] [2024-09-10T02:57:37.631Z] CLI Version:   13.16.0
+[debug] [2024-09-10T02:57:37.632Z] Platform:      darwin
+[debug] [2024-09-10T02:57:37.632Z] Node Version:  v18.16.0
+[debug] [2024-09-10T02:57:37.632Z] Time:          Tue Sep 10 2024 11:57:37 GMT+0900 (대한민국 표준시)
+[debug] [2024-09-10T02:57:37.632Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2024-09-10T02:57:37.664Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2024-09-10T02:57:37.664Z] > authorizing via signed-in user (motionbit.dev@gmail.com)
+[debug] [2024-09-10T02:57:37.664Z] [iam] checking project motionbit-doc for permissions ["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]
+[debug] [2024-09-10T02:57:37.665Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/motionbit-doc:testIamPermissions [none]
+[debug] [2024-09-10T02:57:37.665Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/motionbit-doc:testIamPermissions x-goog-quota-user=projects/motionbit-doc
+[debug] [2024-09-10T02:57:37.665Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/motionbit-doc:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]}
+[debug] [2024-09-10T02:57:38.547Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/motionbit-doc:testIamPermissions 200
+[debug] [2024-09-10T02:57:38.547Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/motionbit-doc:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get"]}
+[debug] [2024-09-10T02:57:38.548Z] >>> [apiv2][query] POST https://iam.googleapis.com/v1/projects/motionbit-doc/serviceAccounts/motionbit-doc@appspot.gserviceaccount.com:testIamPermissions [none]
+[debug] [2024-09-10T02:57:38.548Z] >>> [apiv2][body] POST https://iam.googleapis.com/v1/projects/motionbit-doc/serviceAccounts/motionbit-doc@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[debug] [2024-09-10T02:57:39.634Z] <<< [apiv2][status] POST https://iam.googleapis.com/v1/projects/motionbit-doc/serviceAccounts/motionbit-doc@appspot.gserviceaccount.com:testIamPermissions 200
+[debug] [2024-09-10T02:57:39.634Z] <<< [apiv2][body] POST https://iam.googleapis.com/v1/projects/motionbit-doc/serviceAccounts/motionbit-doc@appspot.gserviceaccount.com:testIamPermissions {"permissions":["iam.serviceAccounts.actAs"]}
+[info] 
+[info] === Deploying to 'motionbit-doc'...
+[info] 
+[info] i  deploying functions 
+[info] Running command: npm --prefix "$RESOURCE_DIR" run lint
+[error] 
+[error] Error: functions predeploy error: Command terminated with non-zero exit code 1
