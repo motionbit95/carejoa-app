@@ -34,6 +34,7 @@ function SelectLocation(props) {
   return (
     <>
       <Button
+        {...props}
         as="a"
         target="_blank"
         variant="outline"

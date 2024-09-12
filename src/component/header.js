@@ -8,6 +8,7 @@ import {
 import React from "react";
 import { FiMap, FiSearch } from "react-icons/fi";
 import SelectLocation from "./select_location";
+import { useNavigate } from "react-router-dom";
 
 function Header(props) {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -27,7 +28,12 @@ function Header(props) {
       borderBottom={"1px solid #d9d9d9"}
       bgColor={useColorModeValue("white", "gray.800")}
     >
-      <Heading size={"md"} color={"blue.500"}>
+      <Heading
+        size={"md"}
+        color={"blue.500"}
+        cursor={"pointer"}
+        onClick={() => (window.location.href = "/")}
+      >
         CareJOA
       </Heading>
       <HStack>
@@ -38,9 +44,22 @@ function Header(props) {
             setSelectCity(city);
             setSelectDistrict(district);
           }}
+          setCode={(city, district) => {
+            if (city) {
+              console.log("시도코드 : ", city);
+            }
+
+            if (district) {
+              console.log("시군구코드 : ", district.substr(2, 5));
+            }
+          }}
         />
         <HStack spacing={0}>
-          <IconButton icon={<FiSearch />} variant={"ghost"} />
+          <IconButton
+            icon={<FiSearch />}
+            variant={"ghost"}
+            onClick={() => (window.location.href = "/search")}
+          />
           <IconButton icon={<FiMap />} variant={"ghost"} />
         </HStack>
       </HStack>

@@ -1,92 +1,66 @@
-import React from "react";
-import {
-  Button,
-  Stack,
-  Box,
-  IconButton,
-  useBreakpointValue,
-} from "@chakra-ui/react";
+import { Button, HStack, IconButton } from "@chakra-ui/react";
+import { useEffect } from "react";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 
-const Pagination = ({ totalPages, currentPage, onPageChange }) => {
-  const handlePageChange = (page) => {
-    onPageChange(page);
+const Pagination = ({ currentPage, setCurrentPage, totalPages }) => {
+  useEffect(() => {
+    console.log(currentPage, totalPages);
+  }, [currentPage]);
+  const handleClick = (pageNumber) => {
+    setCurrentPage(pageNumber);
   };
 
-  const getPageButtons = () => {
-    const pageButtons = [];
-    const delta = 2; // Number of pages to show on either side of the current page
+  const renderPageNumbers = () => {
+    let startPage, endPage;
 
-    let startPage = Math.max(1, currentPage - delta);
-    let endPage = Math.min(totalPages, currentPage + delta);
+    // 현재 페이지를 기준으로 앞뒤로 2개씩 페이지를 보여줌
+    startPage = currentPage - 2;
+    endPage = currentPage + 2;
 
-    if (currentPage - delta <= 1) {
-      endPage = Math.min(
-        totalPages,
-        endPage + (delta - (currentPage - startPage))
+    // startPage가 1보다 작으면 1로 설정
+    if (startPage < 1) {
+      startPage = 1;
+      endPage = 5;
+    }
+
+    // endPage가 totalPages보다 크면 조정
+    if (endPage > totalPages) {
+      endPage = totalPages;
+      startPage = totalPages - 4 > 1 ? totalPages - 4 : 1; // 최소 1부터 시작
+    }
+
+    // 페이지 번호 버튼 생성
+    const pages = [];
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(
+        <Button
+          borderRadius={"full"}
+          variant={i === currentPage ? "solid" : "unstyled"}
+          key={i}
+          onClick={() => handleClick(i)}
+        >
+          {i}
+        </Button>
       );
-      startPage = Math.max(1, endPage - 2 * delta);
     }
 
-    if (totalPages - currentPage < delta) {
-      startPage = Math.max(1, startPage - (delta - (totalPages - currentPage)));
-      endPage = Math.min(totalPages, startPage + 2 * delta);
-    }
-
-    if (totalPages > 5) {
-      //   if (currentPage > 3) {
-      //     pageButtons.push(1);
-      //     if (currentPage > 4) pageButtons.push("...");
-      //   }
-
-      for (let i = startPage; i <= endPage; i++) {
-        pageButtons.push(i);
-      }
-
-      //   if (currentPage < totalPages - 2) {
-      //     if (currentPage < totalPages - 3) pageButtons.push("...");
-      //     pageButtons.push(totalPages);
-      //   }
-    } else {
-      for (let i = 1; i <= totalPages; i++) {
-        pageButtons.push(i);
-      }
-    }
-
-    return pageButtons;
+    return pages;
   };
-
-  const pageButtons = getPageButtons();
-
-  // Define responsive styles for buttons
-  const buttonSize = useBreakpointValue({ base: "xs", md: "md" });
 
   return (
-    <Stack direction="row" spacing={4} align="center" justify="center" my={4}>
+    <HStack spacing={2} w={"full"} justifyContent={"center"} p={4}>
       <IconButton
         icon={<FiChevronLeft />}
-        onClick={() => handlePageChange(currentPage - 1)}
+        onClick={() => handleClick(currentPage - 1)}
         isDisabled={currentPage === 1}
-        size={buttonSize}
       />
-      {pageButtons.map((page, index) => (
-        <Button
-          key={index}
-          onClick={() => page !== "..." && handlePageChange(page)}
-          variant={page === currentPage ? "solid" : "outline"}
-          isDisabled={page === "..."}
-          size={buttonSize}
-        >
-          {page}
-        </Button>
-      ))}
+      {renderPageNumbers()}
       <IconButton
         icon={<FiChevronRight />}
-        onClick={() => handlePageChange(currentPage + 1)}
+        onClick={() => handleClick(currentPage + 1)}
         isDisabled={currentPage === totalPages}
-        size={buttonSize}
       />
-    </Stack>
+    </HStack>
   );
 };
 

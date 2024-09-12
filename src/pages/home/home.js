@@ -18,7 +18,18 @@ function Home(props) {
   return (
     <Stack>
       <Flex position={"fixed"} top={0} left={0} right={0}>
-        <Header setLocation={(city, district) => console.log(city, district)} />
+        <Header
+          setLocation={(city, district) => console.log(city, district)}
+          setCode={(city, district) => {
+            if (city) {
+              console.log("시도코드 : ", city);
+            }
+
+            if (district) {
+              console.log("시군구코드 : ", district.substr(2, 5));
+            }
+          }}
+        />
       </Flex>
       {page === "home" && (
         <Stack pt={"60px"} pb={"80px"} px={2}>

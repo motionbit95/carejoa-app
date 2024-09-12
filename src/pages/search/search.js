@@ -1,4 +1,12 @@
-import { Badge, Box, HStack, Stack, Text } from "@chakra-ui/react";
+import {
+  Badge,
+  Box,
+  HStack,
+  Stack,
+  StackDivider,
+  Text,
+  useColorModeValue,
+} from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
 import SelectLocation, {
   siDoCd,
@@ -6,6 +14,7 @@ import SelectLocation, {
 } from "../../component/select_location";
 import Pagination from "../../component/pagination";
 import { adminPttnCd } from "../../data";
+import MapComponent, { Distance, getLocation } from "../../component/kakaomap";
 
 // XML 데이터를 JSON으로 변환하는 함수
 export function xmlToJson(xml) {
@@ -69,14 +78,35 @@ function Search(props) {
   const [totalCount, setTotalCount] = useState(0);
   const [totalPages, setTotalPages] = useState(1); // 총 페이지 수를 설정합니다.
 
+  const [currentPosition, setCurrentPosition] = useState({});
+
   const serviceKey =
     "4eAe85Va5t5sA%2FR%2B2PTfuwd%2BxyGU7h5yNNRENMZ3G7zUociiug2xxmCEi379uajXgHxrSwGwFjBm47JuoC5NhQ%3D%3D";
 
   useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const latitude = position.coords.latitude;
+          const longitude = position.coords.longitude;
+
+          console.log(latitude, longitude);
+          setCurrentPosition({ latitude, longitude });
+        },
+        (error) => {
+          console.log(error);
+        }
+      );
+    } else {
+      document.getElementById("locationInfo").innerText =
+        "Geolocation is not supported by this browser.";
+    }
+  }, []);
+
+  useEffect(() => {
     const getGeneralInfo = async () => {
-      const longTermAdminSym = 21130500195;
       fetch(
-        `http://apis.data.go.kr/B550928/searchLtcInsttService01/getLtcInsttSeachList01?siDoCd=${cityCode}&pageNo=${1}&siGunGuCd=${districtCode}&serviceKey=${serviceKey}`
+        `http://apis.data.go.kr/B550928/searchLtcInsttService01/getLtcInsttSeachList01?siDoCd=${cityCode}&pageNo=${pageNo}&siGunGuCd=${districtCode}&serviceKey=${serviceKey}`
       )
         .then((response) => response.text())
         .then((result) => {
@@ -90,9 +120,6 @@ function Search(props) {
           setPageNo(json.response.body.pageNo.text);
           setNumOfRows(json.response.body.numOfRows.text);
           setTotalCount(json.response.body.totalCount.text);
-          console.log(
-            parseInt(parseInt(json.response.body.totalCount.text) / 10) + 1
-          );
           setTotalPages(
             parseInt(parseInt(json.response.body.totalCount.text) / 10) + 1
           );
@@ -114,42 +141,44 @@ function Search(props) {
                     "application/xml"
                   );
                   // XML 객체를 JSON으로 변환
-                  const json1 = xmlToJson(xmlDoc);
+                  const searchedData = xmlToJson(xmlDoc);
 
+                  // 시설현황 가지고 오기
                   fetch(
                     `http://127.0.0.1:5004/motionbit-doc/us-central1/getFacilityGeneral?longTermAdminSym=${longTermAdminSym}`
                   )
-                    .then((response) => response.text())
+                    .then((response) => response.json())
                     .then((result) => {
-                      console.log(result);
-                    })
-                    .catch((error) => console.error(error));
+                      const generalData = result;
+                      // 인원수 받아오는 함수
+                      fetch(
+                        `http://apis.data.go.kr/B550928/getLtcInsttDetailInfoService02/getAceptncNmprDetailInfoItem02?longTermAdminSym=${longTermAdminSym}&adminPttnCd=${adminPttnCd}&serviceKey=${serviceKey}`
+                      )
+                        .then((response) => response.text())
+                        .then(async (result) => {
+                          // DOMParser를 사용해 XML 문자열을 XML 객체로 변환
+                          const parser = new DOMParser();
+                          const xmlDoc = parser.parseFromString(
+                            result,
+                            "application/xml"
+                          );
+                          // XML 객체를 JSON으로 변환
+                          const json2 = xmlToJson(xmlDoc);
 
-                  // 인원수 받아오는 함수
-                  fetch(
-                    `http://apis.data.go.kr/B550928/getLtcInsttDetailInfoService02/getAceptncNmprDetailInfoItem02?longTermAdminSym=${longTermAdminSym}&adminPttnCd=${adminPttnCd}&serviceKey=${serviceKey}`
-                  )
-                    .then((response) => response.text())
-                    .then((result) => {
-                      // DOMParser를 사용해 XML 문자열을 XML 객체로 변환
-                      const parser = new DOMParser();
-                      const xmlDoc = parser.parseFromString(
-                        result,
-                        "application/xml"
-                      );
-                      // XML 객체를 JSON으로 변환
-                      const json2 = xmlToJson(xmlDoc);
+                          console.log({
+                            ...searchedData.response.body.item,
+                            ...json2.response?.body?.item,
+                            ...generalData[0],
+                          });
 
-                      console.log({
-                        ...json1.response.body.item,
-                        ...json2.response.body.item,
-                      });
-
-                      list.push({
-                        ...json1.response.body.item,
-                        ...json2.response.body.item,
-                      });
-                      if (list.length === items.length) setItems(list);
+                          list.push({
+                            ...searchedData.response.body.item,
+                            ...json2.response?.body?.item,
+                            ...generalData[0],
+                          });
+                          if (list.length === items.length) setItems(list);
+                        })
+                        .catch((error) => console.error(error));
                     })
                     .catch((error) => console.error(error));
                 })
@@ -164,70 +193,87 @@ function Search(props) {
   }, [cityCode, districtCode, pageNo]);
   return (
     <Stack>
-      <SelectLocation
-        city={selectCity}
-        district={selectDistrict}
-        setLocation={(city, district) => {
-          setSelectCity(city);
-          setSelectDistrict(district);
-        }}
-        setCode={(city, district) => {
-          if (city) {
-            console.log("시도코드 : ", city);
-            setCityCode(city);
-          }
+      <HStack p={4} w={"full"}>
+        <SelectLocation
+          w={"full"}
+          city={selectCity}
+          district={selectDistrict}
+          setLocation={(city, district) => {
+            setSelectCity(city);
+            setSelectDistrict(district);
+          }}
+          setCode={(city, district) => {
+            if (city) {
+              setCityCode(city);
+            }
 
-          if (district) {
-            console.log("시군구코드 : ", district.substr(2, 5));
-            setDistrictCode(district.substr(2, 5));
-          }
-        }}
-      />
-
-      <Text>총 {totalCount}개</Text>
-      {items.map((value, index) => (
-        <Stack key={index} spacing={1}>
-          {/* <Box>
+            if (district) {
+              setDistrictCode(district.substr(2, 5));
+            }
+          }}
+        />
+      </HStack>
+      <HStack px={4}>
+        <Text>{"총"}</Text>
+        <HStack spacing={0}>
+          <Text fontWeight={"bold"} color={"blue.500"}>
+            {totalCount}
+          </Text>
+          <Text>개</Text>
+        </HStack>
+      </HStack>
+      <Stack bgColor={useColorModeValue("gray.100", "gray.900")}>
+        {items.map((value, index) => (
+          <Stack key={index} bgColor={"white"} p={4}>
+            {/* <Box>
             <Badge colorScheme="blue">
               {adminPttnCd[value.adminPttnCd.text]}
             </Badge>
           </Box> */}
-          <Text fontWeight={"bold"}>{value.adminNm.text}</Text>
-          <Text>
-            {/* {value.siDoCd.text}
-            {value.siGunGuCd.text}
-            {value.BDongCd.text}
-            {value.riCd.text}
-            {value.detailAddr?.text}|{value.gunmulMlno?.text}
-            {value.gunmulSlno?.text !== "0"
-              ? "-" + value.gunmulSlno?.text + "|"
-              : ""}
-            {value.fi?.text ? value.fi?.text + "층|" : ""}| */}
-            {value.locTelNo_1?.text}-{value.locTelNo_2?.text}-
-            {value.locTelNo_3?.text} | {adminPttnCd[value.adminPttnCd.text]}
-          </Text>
-          <HStack>
-            <Badge>
-              {parseInt(value.totPer?.text) > 100
-                ? "대형"
-                : parseInt(value.totPer?.text) > 30
-                ? "중형"
-                : "소형"}
-            </Badge>
-            <Badge>
-              설립{" "}
-              {new Date().getFullYear() -
-                parseInt(value.longTermPeribRgtDt.text.slice(0, 4)) +
-                1}
-              년
-            </Badge>
-          </HStack>
-        </Stack>
-      ))}
+            <Text fontWeight={"bold"} fontSize={"lg"}>
+              {value.adminNm}
+            </Text>
+            <Text color={"gray.500"}>{value.detailAddr}</Text>
+
+            <HStack divider={<StackDivider borderColor="gray.200" />}>
+              <Distance
+                address={value.detailAddr.split(" (")[0]}
+                currentPosition={currentPosition}
+              />
+
+              <Text>
+                {value.locTelNo_1?.text}-{value.locTelNo_2?.text}-
+                {value.locTelNo_3?.text}
+              </Text>
+            </HStack>
+            <HStack>
+              <Badge variant={"solid"}>
+                {parseInt(value.totPer?.text) > 100
+                  ? "대형"
+                  : parseInt(value.totPer?.text) > 30
+                  ? "중형"
+                  : "소형"}
+              </Badge>
+              <Badge variant={"solid"}>
+                {adminPttnCd[value.adminPttnCd.text]}
+              </Badge>
+              {value.longTermPeribRgtDt &&
+                value.longTermPeribRgtDt.includes("-") && (
+                  <Badge size={"lg"}>
+                    설립{" "}
+                    {new Date().getFullYear() -
+                      value.longTermPeribRgtDt.split("-")[0]}
+                    년
+                  </Badge>
+                )}
+            </HStack>
+          </Stack>
+        ))}
+      </Stack>
       <Pagination
         totalPages={totalPages}
-        currentPage={pageNo}
-        onPageChange={setPageNo}
+        currentPage={parseInt(pageNo)}
+        setCurrentPage={(pageNo) => setPageNo(parseInt(pageNo))}
       />
     </Stack>
   );
