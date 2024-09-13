@@ -4,6 +4,8 @@ import { ChakraProvider, Container } from "@chakra-ui/react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Home from "./pages/home/home";
 import Search from "./pages/search/search";
+import Counseling from "./pages/counseling/counseling";
+import CounselList from "./pages/counseling/counsel_list";
 
 function App() {
   return (
@@ -14,6 +16,8 @@ function App() {
             <Route path="*" element={<Home />} />
             <Route path="/home" element={<Home />} />
             <Route path="/search" element={<Search />} />
+            <Route path="/counseling" element={<CounselList />} />
+            <Route path="/counseling/register" element={<Counseling />} />
           </Routes>
         </BrowserRouter>
       </Container>

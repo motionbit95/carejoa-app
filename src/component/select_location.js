@@ -14,8 +14,6 @@ import {
   useColorModeValue,
   Flex,
   ButtonGroup,
-  Heading,
-  IconButton,
 } from "@chakra-ui/react";
 import React, { useEffect } from "react";
 import { FiChevronDown, FiMap, FiSearch } from "react-icons/fi";
@@ -27,8 +25,12 @@ function SelectLocation(props) {
   const [placement, setPlacement] = React.useState("bottom");
   const [myCity, setMyCity] = React.useState("");
   const [myDistrict, setMyDistrict] = React.useState("");
-  const [selectCity, setSelectCity] = React.useState(props.city);
-  const [selectDistrict, setSelectDistrict] = React.useState(props.district);
+  const [selectCity, setSelectCity] = React.useState(
+    props.city ? props.city : "선택"
+  );
+  const [selectDistrict, setSelectDistrict] = React.useState(
+    props.district ? props.district : "선택"
+  );
 
   useEffect(() => {
     if (selectDistrict) {
@@ -58,9 +60,16 @@ function SelectLocation(props) {
         target="_blank"
         variant="outline"
         rightIcon={<FiChevronDown />}
-        onClick={onOpen}
+        onClick={() => {
+          console.log(props.isDisabled);
+          if (!props.isDisabled) onOpen();
+        }}
       >
-        {props.district === "전체" ? props.city : props.district}
+        {props.district
+          ? props.district
+          : props.defaultValue
+          ? props.defaultValue
+          : "선택"}
       </Button>
       <Drawer placement={placement} onClose={onClose} isOpen={isOpen}>
         <DrawerOverlay />
@@ -131,10 +140,6 @@ function SelectLocation(props) {
                 onClick={() => {
                   console.log(
                     selectCity,
-                    siGunGuCd[selectCity][selectDistrict]
-                  );
-                  props.setCode(
-                    siDoCd[selectCity],
                     siGunGuCd[selectCity][selectDistrict]
                   );
                   props.setLocation(selectCity, selectDistrict);

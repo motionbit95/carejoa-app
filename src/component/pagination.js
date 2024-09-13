@@ -50,13 +50,13 @@ const Pagination = ({ currentPage, setCurrentPage, totalPages, ...props }) => {
   return (
     <HStack {...props} spacing={2} w={"full"} justifyContent={"center"} p={4}>
       <IconButton
-        icon={<FiChevronLeft />}
+        icon={<FiChevronLeft size={20} />}
         onClick={() => handleClick(currentPage - 1)}
         isDisabled={currentPage === 1}
       />
       {renderPageNumbers()}
       <IconButton
-        icon={<FiChevronRight />}
+        icon={<FiChevronRight size={20} />}
         onClick={() => handleClick(currentPage + 1)}
         isDisabled={currentPage === totalPages}
       />

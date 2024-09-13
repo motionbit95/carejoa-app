@@ -12,7 +12,6 @@ import {
   useColorModeValue,
 } from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
-import SelectLocation from "../../component/select_location";
 import Pagination from "../../component/pagination";
 import {
   adminPttnCd,
@@ -22,14 +21,13 @@ import {
   siGunGuCd_2,
 } from "../../data";
 import MapComponent, { Distance, getLocation } from "../../component/kakaomap";
-import SelectTypeCode from "../../component/select_typecode";
-import { facility } from "../../component/select_typecode";
 import { FiBookmark, FiMap, FiSearch } from "react-icons/fi";
 import { BsBookmarkFill } from "react-icons/bs";
-import Banner from "../home/banner";
-import Advertise from "../home/advertise";
 import { useNavigate } from "react-router-dom";
 import BottomNavigation from "../../component/bottom_nav";
+import Advertise from "./advertise";
+import SelectLocation from "./select_location";
+import SelectTypeCode, { facility } from "./select_typecode";
 
 // XML 데이터를 JSON으로 변환하는 함수
 export function xmlToJson(xml) {
@@ -80,16 +78,6 @@ export function xmlToJson(xml) {
   return obj;
 }
 function Search(props) {
-  // 페이지 관련
-  const [page, setPage] = React.useState(
-    window.location.pathname.split("/").pop()
-  );
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    navigate("/" + page);
-  }, [page]);
-
   // 표시할 리스트
   const [selectCity, setSelectCity] = useState("서울");
   const [selectDistrict, setSelectDistrict] = useState("강남구");
@@ -405,11 +393,11 @@ function Search(props) {
             <Heading size={"md"}>희망하는 조건을 선택하세요.</Heading>
             <HStack spacing={0}>
               <IconButton
-                icon={<FiBookmark />}
-                variant={"ghost"}
+                icon={<FiBookmark size={20} />}
+                variant={"unstyle"}
                 onClick={() => (window.location.href = "/")}
               />
-              <IconButton icon={<FiMap />} variant={"ghost"} />
+              <IconButton icon={<FiMap size={20} />} variant={"unstyle"} />
             </HStack>
           </HStack>
         </HStack>
@@ -569,7 +557,7 @@ function Search(props) {
         setCurrentPage={(pageNo) => setPageNo(parseInt(pageNo))}
       />
       <Flex position={"fixed"} bottom={0} left={0} right={0}>
-        <BottomNavigation page={page} onChange={setPage} />
+        <BottomNavigation />
       </Flex>
     </Stack>
   );

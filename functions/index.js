@@ -100,3 +100,59 @@ exports.getFacilityGrade = onRequest(async (req, res) => {
     res.status(500).send("Error fetching orders");
   }
 });
+
+exports.saveDocument = onRequest(async (req, res) => {
+  const userId = "carejoa"; // 예시: 'carejoa'
+  const subCollection = req.query.subCollection; // 예시: 'request'
+  const documentData = req.body; // 요청 본문에서 저장할 데이터 받기
+
+  try {
+    // 특정 사용자의 하위 컬렉션 참조
+    const subCollectionRef = db
+      .collection("database")
+      .doc(userId)
+      .collection(subCollection);
+
+    // 새 문서를 추가합니다.
+    const docRef = await subCollectionRef.add(documentData);
+
+    // 성공적으로 문서가 저장되었음을 응답
+    res
+      .status(200)
+      .send({ id: docRef.id, message: "Document successfully saved." });
+  } catch (error) {
+    console.error("Error saving document:", error);
+    res.status(500).send("Error saving document");
+  }
+});
+
+exports.getCounsel = onRequest(async (req, res) => {
+  const userId = req.query.userId;
+
+  try {
+    // 'users' 컬렉션에서 'age' 필드가 25 이상인 문서를 쿼리
+    const querySnapshot = await db
+      .collection("database")
+      .doc("carejoa")
+      .collection("COUNSELING")
+      .where("userId", "==", userId)
+      .get();
+
+    // 쿼리 결과가 비어있는지 확인
+    if (querySnapshot.empty) {
+      return res.status(404).json({ message: "No matching documents found" });
+    }
+
+    // 쿼리 결과를 배열로 저장
+    let docs = [];
+    querySnapshot.forEach((doc) => {
+      docs.push(doc.data());
+    });
+
+    // 쿼리 결과 반환
+    return res.status(200).json(docs);
+  } catch (error) {
+    console.error("Error fetching documents:", error);
+    return res.status(500).json({ error: error.message });
+  }
+});
