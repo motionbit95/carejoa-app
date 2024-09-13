@@ -7,6 +7,9 @@ import Search from "./pages/search/search";
 import Counseling from "./pages/counseling/counseling";
 import CounselList from "./pages/counseling/counsel_list";
 import CounselView from "./pages/counseling/counsel_view";
+import MyPage from "./pages/mypage/mypage";
+import Login from "./pages/mypage/login";
+import Setting from "./pages/mypage/setting";
 
 function App() {
   return (
@@ -20,6 +23,9 @@ function App() {
             <Route path="/counseling" element={<CounselList />} />
             <Route path="/counseling/register" element={<Counseling />} />
             <Route path="/counseling/view*" element={<CounselView />} />
+            <Route path="/mypage" element={<MyPage />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/mypage/setting" element={<Setting />} />
           </Routes>
         </BrowserRouter>
       </Container>
