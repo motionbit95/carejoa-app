@@ -65,14 +65,18 @@ function Header(props) {
             }}
           />
         )}
-        <HStack spacing={0}>
-          <IconButton
-            icon={<FiSearch size={20} />}
-            variant={"unstyle"}
-            onClick={() => (window.location.href = "/search")}
-          />
-          <IconButton icon={<FiBookmark size={20} />} variant={"unstyle"} />
-        </HStack>
+        {props.customButton ? (
+          props.customButton
+        ) : (
+          <HStack spacing={0}>
+            <IconButton
+              icon={<FiSearch size={20} />}
+              variant={"unstyle"}
+              onClick={() => (window.location.href = "/search")}
+            />
+            <IconButton icon={<FiBookmark size={20} />} variant={"unstyle"} />
+          </HStack>
+        )}
       </HStack>
     </HStack>
   );

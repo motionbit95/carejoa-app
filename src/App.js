@@ -6,6 +6,7 @@ import Home from "./pages/home/home";
 import Search from "./pages/search/search";
 import Counseling from "./pages/counseling/counseling";
 import CounselList from "./pages/counseling/counsel_list";
+import CounselView from "./pages/counseling/counsel_view";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
             <Route path="/search" element={<Search />} />
             <Route path="/counseling" element={<CounselList />} />
             <Route path="/counseling/register" element={<Counseling />} />
+            <Route path="/counseling/view*" element={<CounselView />} />
           </Routes>
         </BrowserRouter>
       </Container>

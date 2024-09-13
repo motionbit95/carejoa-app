@@ -126,7 +126,30 @@ exports.saveDocument = onRequest(async (req, res) => {
   }
 });
 
-exports.getCounsel = onRequest(async (req, res) => {
+exports.deleteDocument = onRequest(async (req, res) => {
+  const userId = "carejoa"; // 예시: 'carejoa'
+  const subCollection = req.query.subCollection; // 예시: 'request'
+  const documentId = req.query.documentId; // 예시: 'documentId'
+
+  try {
+    // 특정 사용자의 하위 컬렉션 참조
+    const subCollectionRef = db
+      .collection("database")
+      .doc(userId)
+      .collection(subCollection);
+
+    // 문서를 삭제합니다.
+    await subCollectionRef.doc(documentId).delete();
+
+    // 성공적으로 문서가 삭제되었음을 응답
+    res.status(200).send({ message: "Document successfully deleted." });
+  } catch (error) {
+    console.error("Error deleting document:", error);
+    res.status(500).send("Error deleting document");
+  }
+});
+
+exports.getCounsels = onRequest(async (req, res) => {
   const userId = req.query.userId;
 
   try {
@@ -146,11 +169,35 @@ exports.getCounsel = onRequest(async (req, res) => {
     // 쿼리 결과를 배열로 저장
     let docs = [];
     querySnapshot.forEach((doc) => {
-      docs.push(doc.data());
+      docs.push({ ...doc.data(), id: doc.id });
     });
 
     // 쿼리 결과 반환
     return res.status(200).json(docs);
+  } catch (error) {
+    console.error("Error fetching documents:", error);
+    return res.status(500).json({ error: error.message });
+  }
+});
+
+exports.getCounsel = onRequest(async (req, res) => {
+  const counselId = req.query.counselId;
+
+  try {
+    // 'users' 컬렉션에서 'age' 필드가 25 이상인 문서를 쿼리
+    const docRef = await db
+      .collection("database")
+      .doc("carejoa")
+      .collection("COUNSELING")
+      .doc(counselId);
+
+    docRef.get().then((doc) => {
+      if (doc.exists) {
+        return res.status(200).json({ ...doc.data(), id: doc.id });
+      } else {
+        return res.status(404).json({ message: "No matching documents found" });
+      }
+    });
   } catch (error) {
     console.error("Error fetching documents:", error);
     return res.status(500).json({ error: error.message });
