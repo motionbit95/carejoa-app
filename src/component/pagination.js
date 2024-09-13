@@ -2,7 +2,7 @@ import { Button, HStack, IconButton } from "@chakra-ui/react";
 import { useEffect } from "react";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 
-const Pagination = ({ currentPage, setCurrentPage, totalPages }) => {
+const Pagination = ({ currentPage, setCurrentPage, totalPages, ...props }) => {
   useEffect(() => {
     console.log(currentPage, totalPages);
   }, [currentPage]);
@@ -48,7 +48,7 @@ const Pagination = ({ currentPage, setCurrentPage, totalPages }) => {
   };
 
   return (
-    <HStack spacing={2} w={"full"} justifyContent={"center"} p={4}>
+    <HStack {...props} spacing={2} w={"full"} justifyContent={"center"} p={4}>
       <IconButton
         icon={<FiChevronLeft />}
         onClick={() => handleClick(currentPage - 1)}

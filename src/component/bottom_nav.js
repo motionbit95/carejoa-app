@@ -13,6 +13,7 @@ function BottomNavigation(props) {
   const { page, onChange } = props;
   return (
     <HStack
+      bgColor={"white"}
       w={"full"}
       justifyContent={"space-around"}
       p={2}

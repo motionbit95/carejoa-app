@@ -20,19 +20,38 @@ import {
 import React, { useEffect } from "react";
 import { FiChevronDown, FiMap, FiSearch } from "react-icons/fi";
 import { cities, districts, siDoCd, siGunGuCd } from "../data";
+import { KakaoMapLocation } from "./kakaomap";
 
 function SelectLocation(props) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [placement, setPlacement] = React.useState("bottom");
-  const [selectCity, setSelectCity] = React.useState("전체");
-  const [selectDistrict, setSelectDistrict] = React.useState("전체");
+  const [myCity, setMyCity] = React.useState("");
+  const [myDistrict, setMyDistrict] = React.useState("");
+  const [selectCity, setSelectCity] = React.useState(props.city);
+  const [selectDistrict, setSelectDistrict] = React.useState(props.district);
+
+  useEffect(() => {
+    if (selectDistrict) {
+      const element = document.getElementById(selectDistrict);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth" }); // 해당 ID의 요소로 스크롤
+      }
+    }
+  }, [selectDistrict]); // selectedId가 변경될 때마다 실행
 
   const handleReset = () => {
-    setSelectCity("전체");
-    setSelectDistrict("전체");
+    setSelectCity(myCity);
+    setSelectDistrict(myDistrict);
   };
   return (
     <>
+      <KakaoMapLocation
+        setLocation={(city, district) => {
+          console.log(city, district);
+          setMyCity(city);
+          setMyDistrict(district);
+        }}
+      />
       <Button
         {...props}
         as="a"
@@ -76,6 +95,7 @@ function SelectLocation(props) {
               <Stack w={"70%"} maxH={"500px"} overflowY={"scroll"}>
                 {districts[selectCity]?.map((district) => (
                   <Flex
+                    id={district}
                     cursor={"pointer"}
                     py={2}
                     px={8}
@@ -102,7 +122,7 @@ function SelectLocation(props) {
                   //   props.setLocation("전체", "전체");
                 }}
               >
-                전체 지역 설정
+                내 지역 설정
               </Button>
               <Button
                 w={"100%"}
