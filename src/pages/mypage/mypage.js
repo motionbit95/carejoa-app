@@ -22,13 +22,16 @@ import { useNavigate } from "react-router-dom";
 function MyPage(props) {
   const navigate = useNavigate();
   const [state, setState] = React.useState({ isLogin: false });
+  const [user, setUser] = React.useState(null);
   useEffect(() => {
     auth.onAuthStateChanged((user) => {
       if (!user) {
         console.log("user is not logged in");
+        setUser(null);
         setState({ ...state, isLogin: false });
       } else {
-        console.log("user is logged in");
+        setUser(user);
+        console.log("user is logged in", user);
         setState({ ...state, isLogin: true });
       }
     });
@@ -49,12 +52,12 @@ function MyPage(props) {
               justifyContent={"space-between"}
               p={3}
             >
-              <Avatar size={"lg"} />
+              <Avatar size={"lg"} src={user?.photoURL} />
               <Stack w={"full"} spacing={1}>
                 <Text fontSize={"lg"} fontWeight={"bold"}>
-                  홍길동
+                  {user?.displayName}
                 </Text>
-                <Text color={"gray.500"}>test@example.com</Text>
+                <Text color={"gray.500"}>{user?.email}</Text>
               </Stack>
               <Button
                 borderRadius={"full"}

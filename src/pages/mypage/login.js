@@ -32,7 +32,7 @@ function Login(props) {
     signInWithEmailAndPassword(auth, state.email, state.password).then(
       (user) => {
         console.log(user);
-        navigate(-1);
+        navigate("/home");
       },
       (error) => {
         console.log(error);

@@ -15,19 +15,29 @@ import {
 import React, { useEffect } from "react";
 import Header from "../../component/header";
 import { auth } from "../../firebase/config";
+import { useNavigate } from "react-router-dom";
+import {
+  EmailAuthProvider,
+  reauthenticateWithCredential,
+  updatePassword,
+  updateProfile,
+} from "firebase/auth";
 
 function Setting(props) {
+  const navigate = useNavigate();
   const [formData, setFormData] = React.useState({
-    name: null,
-    email: null,
-    confirmPassword: null,
-    password: null,
+    // name: null,
+    // email: null,
+    // confirmPassword: null,
+    // password: null,
   });
 
   const [defaultValue, setDefaultValue] = React.useState({
     name: null,
     email: null,
   });
+
+  const imageRef = React.useRef();
 
   useEffect(() => {
     auth.onAuthStateChanged((user) => {
@@ -37,6 +47,7 @@ function Setting(props) {
           ...defaultValue,
           name: user.displayName,
           email: user.email,
+          photoURL: user.photoURL,
         });
       }
     });
@@ -46,6 +57,99 @@ function Setting(props) {
     console.log(formData);
   }, [formData]);
 
+  const handleLogout = () => {
+    auth.signOut();
+
+    navigate("/mypage");
+  };
+
+  const handleSubmit = async () => {
+    console.log(formData);
+
+    if (formData.photoURL) {
+      const file = formData.profile;
+      const reader = new FileReader();
+      let fileData = await new Promise((resolve, reject) => {
+        reader.onload = () =>
+          resolve({
+            name: file.name,
+            mimetype: file.type,
+            content: reader.result.split(",")[1], // base64 데이터 추출
+          });
+        reader.onerror = (error) => reject(error);
+        reader.readAsDataURL(file);
+      });
+
+      console.log(fileData);
+
+      fetch(`http://127.0.0.1:5004/motionbit-doc/us-central1/uploadFiles`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          files: [fileData],
+        }),
+      })
+        .then((response) => response.json())
+        .then((result) => {
+          console.log(result);
+          if (result.code === "0000") {
+            // 업로드 된 링크를 반환합니다.
+            console.log(result.filePaths[0]);
+
+            updateProfile(auth.currentUser, {
+              photoURL: result.filePaths[0],
+            });
+          }
+        })
+        .catch((error) => {
+          console.error("Error uploading files:", error);
+          return [];
+        });
+    }
+
+    if (formData.name) {
+      updateProfile(auth.currentUser, {
+        displayName: formData.name,
+      });
+    }
+
+    if (formData.password && formData.confirmPassword) {
+      const credential = EmailAuthProvider.credential(
+        defaultValue.email,
+        formData.confirmPassword
+      );
+      reauthenticateWithCredential(auth.currentUser, credential)
+        .then(() => {
+          console.log("password verified");
+          updatePassword(auth.currentUser, formData.password)
+            .then(() => {
+              console.log("password updated");
+              alert("비밀번호가 변경되었습니다.");
+              navigate(-1);
+            })
+            .catch((error) => {
+              console.log(error);
+            });
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
+
+    alert("유저 정보가 변경되었습니다.");
+    navigate("/mypage");
+  };
+
+  const handleFile = (file) => {
+    const url = URL.createObjectURL(file); // 파일에 대한 URL 생성
+    console.log(url);
+    setDefaultValue({ ...defaultValue, photoURL: url });
+    setFormData({ ...formData, photoURL: url, profile: file }); // 상태 업데이트
+    imageRef.current.value = null;
+  };
+
   return (
     <Stack>
       <Stack position={"sticky"} top={0} left={0} right={0} spacing={0}>
@@ -53,11 +157,23 @@ function Setting(props) {
       </Stack>
 
       <VStack w={"full"} p={4} spacing={8}>
-        <Avatar size={"xl"} />
+        <Avatar
+          size={"xl"}
+          src={defaultValue.photoURL}
+          onClick={() => imageRef.current.click()}
+        />
+        <Input
+          type="file"
+          display={"none"}
+          id="file"
+          accept="image/*"
+          ref={imageRef}
+          onChange={(e) => handleFile(e.target.files[0])}
+        />
 
         <Stack spacing={4} w={"full"}>
           <FormControl>
-            <FormLabel>이름</FormLabel>
+            <FormLabel>닉네임</FormLabel>
 
             <Input
               defaultValue={defaultValue.name}
@@ -110,10 +226,15 @@ function Setting(props) {
             </Stack>
           </FormControl>
           <HStack divider={<StackDivider />} py={8}>
-            <Text color={"gray.500"} variant={"unstyled"}>
+            <Text
+              color={"gray.500"}
+              variant={"unstyled"}
+              cursor={"pointer"}
+              onClick={() => handleLogout()}
+            >
               로그아웃
             </Text>
-            <Text color={"gray.500"} variant={"unstyled"}>
+            <Text color={"gray.500"} variant={"unstyled"} cursor={"pointer"}>
               탈퇴하기
             </Text>
           </HStack>
@@ -134,7 +255,7 @@ function Setting(props) {
           w={"full"}
           colorScheme="blue"
           height={"60px"}
-          onClick={() => console.log(formData)}
+          onClick={handleSubmit}
         >
           저장하기
         </Button>

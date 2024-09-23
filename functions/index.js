@@ -14,16 +14,26 @@ const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 
 const bodyParser = require("body-parser");
+const { Storage } = require("@google-cloud/storage");
+const path = require("path");
+const os = require("os");
+const fs = require("fs");
 
 // Firebase Admin SDK 초기화
 admin.initializeApp();
 const db = admin.firestore();
+const auth = admin.auth();
 
 // Express 라우터
 const express = require("express");
 const app = express();
 
 app.use(bodyParser.json());
+
+// Firebase Authentication 에뮬레이터 설정
+if (process.env.FUNCTIONS_EMULATOR) {
+  process.env.FIREBASE_AUTH_EMULATOR_HOST = "localhost:9099";
+}
 
 // Create and deploy your first functions
 // https://firebase.google.com/docs/functions/get-started
@@ -201,5 +211,112 @@ exports.getCounsel = onRequest(async (req, res) => {
   } catch (error) {
     console.error("Error fetching documents:", error);
     return res.status(500).json({ error: error.message });
+  }
+});
+
+exports.getReviews = onRequest(async (req, res) => {
+  try {
+    // 'users' 컬렉션에서 'age' 필드가 25 이상인 문서를 쿼리
+    const querySnapshot = await db
+      .collection("database")
+      .doc("carejoa")
+      .collection("REVIEWS")
+      .get();
+
+    // 쿼리 결과가 비어있는지 확인
+    if (querySnapshot.empty) {
+      return res.status(404).json({ message: "No matching documents found" });
+    }
+
+    // 쿼리 결과를 배열로 저장
+    let docs = [];
+    querySnapshot.forEach((doc) => {
+      docs.push({ ...doc.data(), id: doc.id });
+    });
+
+    // 쿼리 결과 반환
+    return res.status(200).json(docs);
+  } catch (error) {
+    console.error("Error fetching documents:", error);
+    return res.status(500).json({ error: error.message });
+  }
+});
+
+// 파일 리스트를 업로드하는 Firebase Functions
+exports.uploadFiles = onRequest(async (req, res) => {
+  try {
+    const files = req.body.files; // 클라이언트에서 보내는 파일 리스트
+    const bucket = admin.storage().bucket();
+    const filePaths = []; // 파일 경로를 저장할 배열
+
+    // 파일 리스트 처리
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const tempFilePath = path.join(os.tmpdir(), file.name);
+
+      // 파일을 임시 경로에 저장
+      fs.writeFileSync(tempFilePath, file.content, "base64");
+
+      const destinationPath = `uploads%2F${file.name}?alt=media`;
+
+      // Firebase Storage에 업로드
+      let temp = await bucket.upload(tempFilePath, {
+        destination: destinationPath,
+        metadata: {
+          contentType: file.mimetype,
+        },
+      });
+
+      // 파일 경로 저장 (업로드된 파일의 경로 생성)
+      const fileUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${destinationPath}`;
+      filePaths.push(fileUrl);
+
+      // 임시 파일 삭제
+      fs.unlinkSync(tempFilePath);
+    }
+
+    res.status(200).send({
+      message: "Files uploaded successfully",
+      code: "0000",
+      filePaths: filePaths,
+    });
+  } catch (error) {
+    console.error("Error uploading files: ", error);
+    res.status(500).send({ message: "Error uploading files", code: "1001" });
+  }
+});
+
+// 특정 UID의 사용자 정보를 가져오는 함수
+exports.getUserInfoByUID = onRequest(async (req, res) => {
+  const uid = req.body.uid; // 클라이언트에서 UID 받기
+
+  console.log(uid);
+
+  if (!uid) {
+    return res.status(400).send("UID is required");
+  }
+
+  try {
+    // UID를 사용해 Firebase Auth에서 사용자 정보 가져오기
+    const userRecord = await admin
+      .auth()
+      .getUser("QgZhykxEyTjE9jGHugBS7BU5w28p");
+
+    console.log(userRecord);
+
+    // 사용자 정보 반환
+    res.status(200).send({
+      uid: userRecord.uid,
+      email: userRecord.email,
+      displayName: userRecord.displayName,
+      phoneNumber: userRecord.phoneNumber,
+      photoURL: userRecord.photoURL,
+      emailVerified: userRecord.emailVerified,
+      disabled: userRecord.disabled,
+      metadata: userRecord.metadata, // 생성 및 마지막 로그인 정보
+    });
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    res.status(500).send("Error fetching user data");
   }
 });

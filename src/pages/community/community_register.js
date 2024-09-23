@@ -1,0 +1,205 @@
+import {
+  Box,
+  Button,
+  Center,
+  Flex,
+  Input,
+  Stack,
+  Text,
+  Textarea,
+  VStack,
+} from "@chakra-ui/react";
+import React, { useEffect } from "react";
+import Header from "../../component/header";
+import { useLocation, useNavigate } from "react-router-dom";
+import ImageUploader from "../../component/image_uploader";
+import { FiImage } from "react-icons/fi";
+import { auth } from "../../firebase/config";
+
+function CommunityRegister(props) {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { path } = location.state || "/";
+
+  const [imageList, setImageList] = React.useState([]);
+  const [urlList, setUrlList] = React.useState([]);
+  const [content, setContent] = React.useState("");
+
+  const imageRef = React.useRef();
+
+  const handleFiles = (event) => {
+    event.preventDefault();
+
+    const files = Array.from(event.target.files); // 파일 목록을 배열로 변환
+    const fileUrls = files.map((file) => {
+      const url = URL.createObjectURL(file); // 파일에 대한 URL 생성
+      return { file, url }; // 파일과 URL을 함께 저장
+    });
+    console.log(fileUrls);
+    setImageList(fileUrls); // 상태 업데이트
+
+    imageRef.current.value = null;
+  };
+
+  const handleSubmit = () => {
+    // console.log(imageList);
+    // console.log(content);
+    uploadFiles(imageList);
+  };
+
+  useEffect(() => {
+    if (urlList.length > 0) {
+      console.log(urlList);
+      console.log(content);
+      // console.log(auth.currentUser.photoURL, auth.currentUser.displayName);
+      // console.log(Date.now());
+
+      fetch(
+        `http://127.0.0.1:5004/motionbit-doc/us-central1/saveDocument?subCollection=${path.toUpperCase()}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userId: auth.currentUser.uid, // 누가 신청했는지 알아야한다.
+            createdAt: Date.now(), // 언제 신청했는지 알아야한다.
+            content: content,
+            urlList: urlList,
+          }),
+        }
+      )
+        .then((response) => response.json())
+        .then((result) => {
+          console.log("Success:", result);
+          // 저장이 완료되었다는 알림을 발생시키고 페이지를 이동합니다.
+          alert("작성이 완료되었습니다.!");
+          navigate(`/community/${path}`);
+        })
+        .catch((error) => console.error("Error:", error));
+    }
+  }, [urlList]);
+
+  const uploadFiles = async (files) => {
+    console.log(files);
+    // 파일 리스트를 읽어들여 base64로 변환
+    const fileData = await Promise.all(
+      files.map(async ({ file }) => {
+        console.log(file);
+        const reader = new FileReader();
+        return new Promise((resolve, reject) => {
+          reader.onload = () =>
+            resolve({
+              name: file.name,
+              mimetype: file.type,
+              content: reader.result.split(",")[1], // base64 데이터 추출
+            });
+          reader.onerror = (error) => reject(error);
+          reader.readAsDataURL(file);
+        });
+      })
+    );
+
+    fetch(`http://127.0.0.1:5004/motionbit-doc/us-central1/uploadFiles`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        files: fileData,
+      }),
+    })
+      .then((response) => response.json())
+      .then((result) => {
+        console.log(result);
+        if (result.code === "0000") {
+          // 업로드 된 링크를 반환합니다.
+          setUrlList(result.filePaths);
+        }
+      })
+      .catch((error) => {
+        console.error("Error uploading files:", error);
+        return [];
+      });
+  };
+
+  return (
+    <Stack bgColor={"gray.100"} minH={"100vh"}>
+      <Flex position={"fixed"} top={0} left={0} right={0}>
+        <Header
+          title={path === "news" ? "시설소식 작성하기" : "이용후기 작성하기"}
+        />
+      </Flex>
+      <Flex w={"full"} pt={"64px"} pb={"80px"} bgColor={"white"} minH={"100vh"}>
+        <Stack w={"full"} spacing={4}>
+          <Flex w={"full"} justifyContent={"center"} pl={4} pr={0} py={2}>
+            <Center
+              minWidth="100px" // 박스의 최소 가로 크기
+              height="100px"
+              background="white"
+              borderRadius={"md"}
+              border={"1px solid #c8c8c8"}
+              mr={2}
+              onClick={() => imageRef.current.click()}
+              cursor={"pointer"}
+            >
+              <VStack>
+                <FiImage size={36} color="#8c8c8c" />
+                <Text>{imageList.length} / 10</Text>
+              </VStack>
+            </Center>
+            <Input
+              display={"none"}
+              type={"file"}
+              ref={imageRef}
+              multiple
+              onChange={handleFiles}
+              accept="image/*"
+            />
+            <ImageUploader
+              imageList={imageList}
+              removeImage={(index) =>
+                setImageList(imageList.filter((_, i) => i !== index))
+              }
+            />
+          </Flex>
+          <Flex w={"full"} justifyContent={"center"} px={4}>
+            <Textarea
+              w={"full"}
+              placeholder={
+                "이곳에 글을 작성해주세요. (최소 10자 이상 입력해주세요.)"
+              }
+              minHeight={"200px"}
+              minLength={10}
+              onChange={(e) => setContent(e.target.value)}
+              value={content}
+              resize={"none"}
+            />
+          </Flex>
+        </Stack>
+      </Flex>
+
+      <Flex position={"fixed"} bottom={0} left={0} right={0}>
+        <Button
+          colorScheme={
+            imageList.length === 0 || content.length < 10 ? "gray" : "blue"
+          }
+          w={"full"}
+          height={"60px"}
+          fontSize={"lg"}
+          borderRadius={0}
+          isDisabled={imageList.length === 0 || content.length < 10}
+          onClick={handleSubmit}
+        >
+          {imageList.length === 0
+            ? "사진을 최소 1장 이상 업로드해주세요."
+            : content.length < 10
+            ? "최소 10자 이상 입력해주세요."
+            : "작성 완료"}
+        </Button>
+      </Flex>
+    </Stack>
+  );
+}
+
+export default CommunityRegister;

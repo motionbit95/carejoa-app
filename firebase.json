@@ -18,6 +18,10 @@
     }
   ],
   "emulators": {
+    "auth": {
+      "port": 9099
+    },
+
     "functions": {
       "host": "127.0.0.1",
       "port": "5004"
