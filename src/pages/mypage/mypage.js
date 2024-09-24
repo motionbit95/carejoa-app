@@ -57,7 +57,9 @@ function MyPage(props) {
                 <Text fontSize={"lg"} fontWeight={"bold"}>
                   {user?.displayName}
                 </Text>
-                <Text color={"gray.500"}>{user?.email}</Text>
+                <Text color={"gray.500"} fontSize={"sm"}>
+                  {user?.email}
+                </Text>
               </Stack>
               <Button
                 borderRadius={"full"}

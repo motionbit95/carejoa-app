@@ -17,6 +17,7 @@ import Header from "../../component/header";
 import { auth } from "../../firebase/config";
 import { useNavigate } from "react-router-dom";
 import {
+  deleteUser,
   EmailAuthProvider,
   reauthenticateWithCredential,
   updatePassword,
@@ -150,6 +151,18 @@ function Setting(props) {
     imageRef.current.value = null;
   };
 
+  const handleDeleteUser = () => {
+    deleteUser(auth.currentUser)
+      .then(() => {
+        console.log("User deleted.");
+        auth.signOut();
+        navigate("/login");
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
   return (
     <Stack>
       <Stack position={"sticky"} top={0} left={0} right={0} spacing={0}>
@@ -234,7 +247,12 @@ function Setting(props) {
             >
               로그아웃
             </Text>
-            <Text color={"gray.500"} variant={"unstyled"} cursor={"pointer"}>
+            <Text
+              color={"gray.500"}
+              variant={"unstyled"}
+              cursor={"pointer"}
+              onClick={() => handleDeleteUser()}
+            >
               탈퇴하기
             </Text>
           </HStack>

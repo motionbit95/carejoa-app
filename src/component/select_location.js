@@ -26,10 +26,10 @@ function SelectLocation(props) {
   const [myCity, setMyCity] = React.useState("");
   const [myDistrict, setMyDistrict] = React.useState("");
   const [selectCity, setSelectCity] = React.useState(
-    props.city ? props.city : "선택"
+    props.city ? props.city : "지역 선택"
   );
   const [selectDistrict, setSelectDistrict] = React.useState(
-    props.district ? props.district : "선택"
+    props.district ? props.district : "지역 선택"
   );
 
   useEffect(() => {
@@ -49,7 +49,7 @@ function SelectLocation(props) {
     <>
       <KakaoMapLocation
         setLocation={(city, district) => {
-          console.log(city, district);
+          // console.log(city, district);
           setMyCity(city);
           setMyDistrict(district);
         }}
@@ -61,7 +61,7 @@ function SelectLocation(props) {
         variant="outline"
         rightIcon={<FiChevronDown />}
         onClick={() => {
-          console.log(props.isDisabled);
+          // console.log(props.isDisabled);
           if (!props.isDisabled) onOpen();
         }}
       >
@@ -69,7 +69,7 @@ function SelectLocation(props) {
           ? props.district
           : props.defaultValue
           ? props.defaultValue
-          : "선택"}
+          : "지역 선택"}
       </Button>
       <Drawer placement={placement} onClose={onClose} isOpen={isOpen}>
         <DrawerOverlay />
@@ -138,10 +138,10 @@ function SelectLocation(props) {
                 size={"lg"}
                 colorScheme="blue"
                 onClick={() => {
-                  console.log(
-                    selectCity,
-                    siGunGuCd[selectCity][selectDistrict]
-                  );
+                  // console.log(
+                  //   selectCity,
+                  //   siGunGuCd[selectCity][selectDistrict]
+                  // );
                   props.setLocation(selectCity, selectDistrict);
                   onClose();
                 }}

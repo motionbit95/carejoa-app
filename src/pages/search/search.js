@@ -77,6 +77,10 @@ export function xmlToJson(xml) {
 
   return obj;
 }
+
+export const serviceKey =
+  "4eAe85Va5t5sA%2FR%2B2PTfuwd%2BxyGU7h5yNNRENMZ3G7zUociiug2xxmCEi379uajXgHxrSwGwFjBm47JuoC5NhQ%3D%3D";
+
 function Search(props) {
   // 표시할 리스트
   const [selectCity, setSelectCity] = useState("서울");
@@ -98,9 +102,6 @@ function Search(props) {
   const [totalPages, setTotalPages] = useState(1); // 총 페이지 수를 설정합니다.
 
   const [currentPosition, setCurrentPosition] = useState({});
-
-  const serviceKey =
-    "4eAe85Va5t5sA%2FR%2B2PTfuwd%2BxyGU7h5yNNRENMZ3G7zUociiug2xxmCEi379uajXgHxrSwGwFjBm47JuoC5NhQ%3D%3D";
 
   // 요양병원 리스트
   const [hospitalList, setHospitalList] = useState([]);

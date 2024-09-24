@@ -4,7 +4,13 @@ import { Image } from "@chakra-ui/react";
 
 function Advertise(props) {
   return (
-    <BannerCarousel>
+    <BannerCarousel
+      showArrows={false}
+      showThumbs={false}
+      showStatus={false}
+      autoPlay={true}
+      infiniteLoop={true}
+    >
       <Image src={require("../../assets/banner/advertise.png")} />
       <Image src={require("../../assets/banner/advertise.png")} />
       <Image src={require("../../assets/banner/advertise.png")} />

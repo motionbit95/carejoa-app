@@ -127,10 +127,10 @@ function SelectLocation(props) {
                 size={"lg"}
                 colorScheme="blue"
                 onClick={() => {
-                  console.log(
-                    selectCity,
-                    siGunGuCd[selectCity][selectDistrict]
-                  );
+                  // console.log(
+                  //   selectCity,
+                  //   siGunGuCd[selectCity][selectDistrict]
+                  // );
                   props.setCode(
                     siDoCd[selectCity],
                     siGunGuCd[selectCity][selectDistrict]

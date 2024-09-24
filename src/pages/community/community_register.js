@@ -15,6 +15,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import ImageUploader from "../../component/image_uploader";
 import { FiImage } from "react-icons/fi";
 import { auth } from "../../firebase/config";
+import AutoComplete from "../../component/autocomplete";
 
 function CommunityRegister(props) {
   const navigate = useNavigate();
@@ -24,8 +25,17 @@ function CommunityRegister(props) {
   const [imageList, setImageList] = React.useState([]);
   const [urlList, setUrlList] = React.useState([]);
   const [content, setContent] = React.useState("");
+  const [facility, setFacility] = React.useState({
+    code: "",
+    type: "",
+    name: "",
+    city: "",
+    district: "",
+  });
 
   const imageRef = React.useRef();
+
+  const [isLoading, setIsLoading] = React.useState(false);
 
   const handleFiles = (event) => {
     event.preventDefault();
@@ -36,7 +46,7 @@ function CommunityRegister(props) {
       return { file, url }; // 파일과 URL을 함께 저장
     });
     console.log(fileUrls);
-    setImageList(fileUrls); // 상태 업데이트
+    setImageList([...imageList, ...fileUrls]); // 상태 업데이트
 
     imageRef.current.value = null;
   };
@@ -49,6 +59,7 @@ function CommunityRegister(props) {
 
   useEffect(() => {
     if (urlList.length > 0) {
+      setIsLoading(true);
       console.log(urlList);
       console.log(content);
       // console.log(auth.currentUser.photoURL, auth.currentUser.displayName);
@@ -66,6 +77,7 @@ function CommunityRegister(props) {
             createdAt: Date.now(), // 언제 신청했는지 알아야한다.
             content: content,
             urlList: urlList,
+            facility: facility,
           }),
         }
       )
@@ -73,6 +85,7 @@ function CommunityRegister(props) {
         .then((result) => {
           console.log("Success:", result);
           // 저장이 완료되었다는 알림을 발생시키고 페이지를 이동합니다.
+          setIsLoading(false);
           alert("작성이 완료되었습니다.!");
           navigate(`/community/${path}`);
         })
@@ -123,6 +136,10 @@ function CommunityRegister(props) {
       });
   };
 
+  const searchFacilitity = (keyword) => {
+    console.log(keyword);
+  };
+
   return (
     <Stack bgColor={"gray.100"} minH={"100vh"}>
       <Flex position={"fixed"} top={0} left={0} right={0}>
@@ -132,6 +149,17 @@ function CommunityRegister(props) {
       </Flex>
       <Flex w={"full"} pt={"64px"} pb={"80px"} bgColor={"white"} minH={"100vh"}>
         <Stack w={"full"} spacing={4}>
+          <Flex w={"full"} justifyContent={"center"} px={4}>
+            <AutoComplete
+              setFacility={(name, code) =>
+                setFacility({ ...facility, name: name, code: code })
+              }
+              setType={(type) => setFacility({ ...facility, type: type })}
+              setLocation={(city, district) =>
+                setFacility({ ...facility, city: city, district: district })
+              }
+            />
+          </Flex>
           <Flex w={"full"} justifyContent={"center"} pl={4} pr={0} py={2}>
             <Center
               minWidth="100px" // 박스의 최소 가로 크기
@@ -190,8 +218,11 @@ function CommunityRegister(props) {
           borderRadius={0}
           isDisabled={imageList.length === 0 || content.length < 10}
           onClick={handleSubmit}
+          isLoading={isLoading}
         >
-          {imageList.length === 0
+          {!facility.name
+            ? "이용기관을 선택해주세요."
+            : imageList.length === 0
             ? "사진을 최소 1장 이상 업로드해주세요."
             : content.length < 10
             ? "최소 10자 이상 입력해주세요."

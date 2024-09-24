@@ -18,6 +18,7 @@ const { Storage } = require("@google-cloud/storage");
 const path = require("path");
 const os = require("os");
 const fs = require("fs");
+const cors = require("cors");
 
 // Firebase Admin SDK 초기화
 admin.initializeApp();
@@ -29,6 +30,15 @@ const express = require("express");
 const app = express();
 
 app.use(bodyParser.json());
+
+// CORS 설정 (원하는 도메인만 허용)
+const corsOptions = {
+  origin: "http://localhost:3000", // 허용할 프론트엔드 URL
+  methods: ["POST", "GET", "OPTIONS"], // 허용할 메서드
+  allowedHeaders: ["Content-Type"], // 허용할 헤더
+};
+
+app.use(cors(corsOptions));
 
 // Firebase Authentication 에뮬레이터 설정
 if (process.env.FUNCTIONS_EMULATOR) {
@@ -216,11 +226,20 @@ exports.getCounsel = onRequest(async (req, res) => {
 
 exports.getReviews = onRequest(async (req, res) => {
   try {
+    const { page = 1, limit = 10 } = req.query; // 쿼리 파라미터에서 페이지와 개수 가져오기
+
+    const pageNum = parseInt(page);
+    const limitNum = parseInt(limit);
+    const offset = (pageNum - 1) * limitNum; // 오프셋 계산
+
     // 'users' 컬렉션에서 'age' 필드가 25 이상인 문서를 쿼리
     const querySnapshot = await db
       .collection("database")
       .doc("carejoa")
       .collection("REVIEWS")
+      .orderBy("createdAt") // 정렬할 필드 이름 입력
+      .offset(offset) // 오프셋 적용
+      .limit(limitNum) // 제한 개수 적용
       .get();
 
     // 쿼리 결과가 비어있는지 확인
@@ -257,7 +276,7 @@ exports.uploadFiles = onRequest(async (req, res) => {
       // 파일을 임시 경로에 저장
       fs.writeFileSync(tempFilePath, file.content, "base64");
 
-      const destinationPath = `uploads%2F${file.name}?alt=media`;
+      const destinationPath = `uploads/${file.name}`;
 
       // Firebase Storage에 업로드
       let temp = await bucket.upload(tempFilePath, {
@@ -268,7 +287,9 @@ exports.uploadFiles = onRequest(async (req, res) => {
       });
 
       // 파일 경로 저장 (업로드된 파일의 경로 생성)
-      const fileUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${destinationPath}`;
+      const fileUrl = `https://firebasestorage.googleapis.com/v0/b/${
+        bucket.name
+      }/o/${destinationPath.replace(/\//g, "%2F")}?alt=media`;
       filePaths.push(fileUrl);
 
       // 임시 파일 삭제
@@ -287,10 +308,39 @@ exports.uploadFiles = onRequest(async (req, res) => {
 });
 
 // 특정 UID의 사용자 정보를 가져오는 함수
-exports.getUserInfoByUID = onRequest(async (req, res) => {
-  const uid = req.body.uid; // 클라이언트에서 UID 받기
+exports.getUserInfoByUID = onRequest(async (req, res) => {});
 
-  console.log(uid);
+exports.addUser = onRequest(async (req, res) => {
+  const userId = "carejoa"; // 예시: 'carejoa'
+  const subCollection = "USERS"; // 예시: 'request'
+  const uid = req.body.uid; // 클라이언트에서 UID 받기
+  const documentData = req.body; // 요청 본문에서 저장할 데이터 받기
+
+  console.log(documentData, uid, userId, subCollection);
+
+  try {
+    // 특정 사용자의 하위 컬렉션 참조
+    const subCollectionRef = db
+      .collection("database")
+      .doc(userId)
+      .collection(subCollection);
+
+    // 새 문서를 추가합니다.
+    const docRef = await subCollectionRef.doc(uid).set(documentData);
+
+    // 성공적으로 문서가 저장되었음을 응답
+    res
+      .status(200)
+      .send({ id: docRef.id, message: "Document successfully saved." });
+  } catch (error) {
+    console.error("Error saving document:", error);
+    res.status(500).send("Error saving document");
+  }
+});
+
+app.get("/getUserInfo", async (req, res) => {
+  const { uid } = req.query;
+  // const uid = req.body.uid; // 클라이언트에서 UID 받기
 
   if (!uid) {
     return res.status(400).send("UID is required");
@@ -298,25 +348,14 @@ exports.getUserInfoByUID = onRequest(async (req, res) => {
 
   try {
     // UID를 사용해 Firebase Auth에서 사용자 정보 가져오기
-    const userRecord = await admin
-      .auth()
-      .getUser("QgZhykxEyTjE9jGHugBS7BU5w28p");
-
-    console.log(userRecord);
+    const userRecord = await admin.auth().getUser(uid);
 
     // 사용자 정보 반환
-    res.status(200).send({
-      uid: userRecord.uid,
-      email: userRecord.email,
-      displayName: userRecord.displayName,
-      phoneNumber: userRecord.phoneNumber,
-      photoURL: userRecord.photoURL,
-      emailVerified: userRecord.emailVerified,
-      disabled: userRecord.disabled,
-      metadata: userRecord.metadata, // 생성 및 마지막 로그인 정보
-    });
+    res.status(200).send(userRecord);
   } catch (error) {
     console.error("Error fetching user data:", error);
     res.status(500).send("Error fetching user data");
   }
 });
+
+exports.api = functions.https.onRequest(app);
