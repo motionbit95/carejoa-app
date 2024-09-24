@@ -1,6 +1,15 @@
 import logo from "./logo.svg";
 import "./App.css";
-import { ChakraProvider, Container } from "@chakra-ui/react";
+import {
+  Box,
+  Center,
+  ChakraProvider,
+  Container,
+  Flex,
+  Heading,
+  HStack,
+  Text,
+} from "@chakra-ui/react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Home from "./pages/home/home";
 import Search from "./pages/search/search";
@@ -13,28 +22,37 @@ import Setting from "./pages/mypage/setting";
 import CommunityList from "./pages/community/community_list";
 import CommunityRegister from "./pages/community/community_register";
 import SignUp from "./pages/mypage/signup";
+import Find from "./pages/mypage/find";
+import Review from "./pages/mypage/review";
 
 function App() {
   return (
     <ChakraProvider>
-      <Container maxW={"container.sm"} p={0}>
-        <BrowserRouter>
-          <Routes>
-            <Route path="*" element={<Home />} />
-            <Route path="/home" element={<Home />} />
-            <Route path="/search" element={<Search />} />
-            <Route path="/community/*" element={<CommunityList />} />
-            <Route path="/community/register" element={<CommunityRegister />} />
-            <Route path="/counseling" element={<CounselList />} />
-            <Route path="/counseling/register" element={<Counseling />} />
-            <Route path="/counseling/view*" element={<CounselView />} />
-            <Route path="/mypage" element={<MyPage />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<SignUp />} />
-            <Route path="/mypage/setting" element={<Setting />} />
-          </Routes>
-        </BrowserRouter>
-      </Container>
+      <Flex bgColor={"gray.50"}>
+        <Container maxW={"480px"} p={0} bgColor={"white"}>
+          <BrowserRouter>
+            <Routes>
+              <Route path="*" element={<Home />} />
+              <Route path="/home" element={<Home />} />
+              <Route path="/search" element={<Search />} />
+              <Route path="/community/*" element={<CommunityList />} />
+              <Route
+                path="/community/register"
+                element={<CommunityRegister />}
+              />
+              <Route path="/counseling" element={<CounselList />} />
+              <Route path="/counseling/register" element={<Counseling />} />
+              <Route path="/counseling/view*" element={<CounselView />} />
+              <Route path="/mypage" element={<MyPage />} />
+              <Route path="/review" element={<Review />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<SignUp />} />
+              <Route path="/find/*" element={<Find />} />
+              <Route path="/mypage/setting" element={<Setting />} />
+            </Routes>
+          </BrowserRouter>
+        </Container>
+      </Flex>
     </ChakraProvider>
   );
 }

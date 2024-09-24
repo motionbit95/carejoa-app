@@ -1,5 +1,9 @@
 import {
   Button,
+  FormControl,
+  FormHelperText,
+  FormLabel,
+  Heading,
   HStack,
   Input,
   Modal,
@@ -24,6 +28,7 @@ import { collection } from "firebase/firestore";
 import RadioButtonGroup from "../../component/radiobuttongroup";
 import { serviceKey, xmlToJson } from "../search/search";
 import AutoComplete from "../../component/autocomplete";
+import Header from "../../component/header";
 
 function SignUp(props) {
   const navigate = useNavigate();
@@ -31,8 +36,9 @@ function SignUp(props) {
   const [userInfo, setUserInfo] = React.useState({
     email: null,
     password: null,
-    type: "personal",
+    type: "개인회원",
   });
+  const [confirmPassword, setConfirmPassword] = React.useState("");
 
   const [facility, setFacility] = React.useState({
     code: "",
@@ -52,11 +58,24 @@ function SignUp(props) {
   }
 
   const handleSubmit = () => {
-    const username = generateRandomUsername();
-    console.log(username);
-    console.log(userInfo.email);
-    console.log(userInfo.password);
-    console.log(userInfo.type);
+    if (userInfo.password !== confirmPassword) {
+      alert("패스워드가 일치하지 않습니다.");
+      return;
+    }
+
+    let username;
+
+    // console.log(username);
+    // console.log(userInfo.email);
+    // console.log(userInfo.password);
+    // console.log(userInfo.type);
+    console.log(facility);
+
+    if (userInfo.type === "개인회원") {
+      username = generateRandomUsername();
+    } else {
+      username = facility.name;
+    }
 
     createUserWithEmailAndPassword(auth, userInfo.email, userInfo.password)
       .then(async (userCredential) => {
@@ -77,6 +96,7 @@ function SignUp(props) {
             uid: user.uid,
             email: user.email,
             type: userInfo.type,
+            facility: facility,
           }),
         })
           .then(() => {
@@ -127,89 +147,145 @@ function SignUp(props) {
 
   return (
     <Stack>
-      <RadioButtonGroup
-        list={["개인회원", "기관회원"]}
-        defaultValue="개인회원"
-        setValue={(value) => setUserInfo({ ...userInfo, type: value })}
-      />
-      {userInfo.type === "기관회원" ? (
-        <Stack>
-          <HStack>
+      <Stack position={"sticky"} top={0} left={0} right={0} spacing={0}>
+        <Header title={"회원가입"} customButton={<></>} />
+      </Stack>
+      <VStack spacing={4} w={"100%"} p={4}>
+        <Heading>회원가입 정보 입력</Heading>
+        <Stack spacing={4} w={"100%"} p={4}>
+          <FormControl isRequired>
+            <FormLabel>회원 구분</FormLabel>
+            <RadioButtonGroup
+              list={["개인회원", "기관회원"]}
+              defaultValue="개인회원"
+              setValue={(value) => setUserInfo({ ...userInfo, type: value })}
+            />
+          </FormControl>
+          {userInfo.type === "기관회원" ? (
+            <Stack>
+              <HStack>
+                <Input
+                  size={"lg"}
+                  type="text"
+                  placeholder="기관코드를 입력하세요."
+                  value={facility.code}
+                  onChange={(e) =>
+                    setFacility({ ...userInfo, code: e.target.value })
+                  }
+                />
+                <Button onClick={() => checkFacility(facility.code)}>
+                  확인
+                </Button>
+              </HStack>
+              <Text
+                cursor={"pointer"}
+                color="red.500"
+                fontSize="sm"
+                fontWeight="bold"
+                px={2}
+                textDecoration={"underline"}
+                onClick={() => onOpen()}
+              >
+                기관코드찾기
+              </Text>
+            </Stack>
+          ) : null}
+          <FormControl isRequired>
+            <FormLabel>이메일</FormLabel>
+            <FormHelperText>추후 로그인 시 아이디로 사용됩니다.</FormHelperText>
             <Input
-              type="text"
-              placeholder="기관코드를 입력하세요."
-              value={facility.code}
+              size={"lg"}
+              type="email"
+              placeholder="이메일를 입력하세요."
               onChange={(e) =>
-                setFacility({ ...userInfo, code: e.target.value })
+                setUserInfo({ ...userInfo, email: e.target.value })
               }
             />
-            <Button onClick={() => checkFacility(facility.code)}>확인</Button>
-          </HStack>
-          <Text
-            cursor={"pointer"}
-            color="red.500"
-            fontSize="sm"
-            fontWeight="bold"
-            px={2}
-            textDecoration={"underline"}
-            onClick={() => onOpen()}
-          >
-            기관코드찾기
-          </Text>
+          </FormControl>
+          <FormControl isRequired>
+            <FormLabel>패스워드</FormLabel>
+            <Input
+              size={"lg"}
+              type="password"
+              placeholder="패스워드를 입력하세요."
+              onChange={(e) =>
+                setUserInfo({ ...userInfo, password: e.target.value })
+              }
+            />
+          </FormControl>
+          <FormControl isRequired>
+            <FormLabel>패스워드 확인</FormLabel>
+            <Input
+              size={"lg"}
+              type="password"
+              placeholder="패스워드를 확인해주세요."
+              onChange={(e) => setConfirmPassword(e.target.value)}
+            />
+          </FormControl>
         </Stack>
-      ) : null}
-      <Input
-        type="email"
-        onChange={(e) => setUserInfo({ ...userInfo, email: e.target.value })}
-      />
-      <Input
-        type="password"
-        onChange={(e) => setUserInfo({ ...userInfo, password: e.target.value })}
-      />
-      <Button onClick={handleSubmit}>회원가입하기</Button>
+        <Button onClick={handleSubmit} w={"100%"} colorScheme="blue" size="lg">
+          회원가입하기
+        </Button>
+        <HStack>
+          <Text>이미 회원이신가요?</Text>
+          <Text
+            fontWeight={"bold"}
+            color={"blue.500"}
+            cursor={"pointer"}
+            onClick={() => navigate("/login")}
+            textDecoration={"underline"}
+          >
+            로그인하기
+          </Text>
+        </HStack>
 
-      <Modal isOpen={isOpen} size={["full", "3xl"]}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>기관코드찾기</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            <Stack spacing={8}>
-              <AutoComplete
-                setFacility={(name, code) => {
-                  console.log(name, code);
-                  setFacility({ ...facility, name: name, code: code });
-                }}
-                setType={(type) => setFacility({ ...facility, type: type })}
-                setLocation={(city, district) => {
-                  setFacility({ ...facility, city: city, district: district });
-                }}
-              />
-              {facility.code && (
-                <VStack>
-                  <Text> {"기관코드는"}</Text>
-                  <Text
-                    fontWeight={"bold"}
-                    color={"red.500"}
-                    maxW={"full"}
-                    textAlign={"center"}
-                  >
-                    {facility.code}
-                  </Text>
-                  <Text> {"입니다."}</Text>
-                </VStack>
-              )}
-              <Button
-                onClick={() => {
-                  onClose();
-                }}
-              >
-                적용
-              </Button>
-            </Stack>
-          </ModalBody>
-        </ModalContent>
-      </Modal>
+        <Modal isOpen={isOpen} size={["full", "3xl"]}>
+          <ModalOverlay />
+          <ModalContent>
+            <ModalHeader>기관코드찾기</ModalHeader>
+            <ModalCloseButton />
+            <ModalBody>
+              <Stack spacing={8}>
+                <AutoComplete
+                  setFacility={(name, code) => {
+                    console.log(name, code);
+                    setFacility({ ...facility, name: name, code: code });
+                  }}
+                  setType={(type) => setFacility({ ...facility, type: type })}
+                  setLocation={(city, district) => {
+                    setFacility({
+                      ...facility,
+                      city: city,
+                      district: district,
+                    });
+                  }}
+                />
+                {facility.code && (
+                  <VStack>
+                    <Text> {"기관코드는"}</Text>
+                    <Text
+                      fontWeight={"bold"}
+                      color={"red.500"}
+                      maxW={"full"}
+                      textAlign={"center"}
+                    >
+                      {facility.code}
+                    </Text>
+                    <Text> {"입니다."}</Text>
+                  </VStack>
+                )}
+                <Button
+                  onClick={() => {
+                    onClose();
+                  }}
+                >
+                  적용
+                </Button>
+              </Stack>
+            </ModalBody>
+          </ModalContent>
+        </Modal>
+      </VStack>
     </Stack>
   );
 }

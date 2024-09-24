@@ -8,8 +8,8 @@ import Category from "./category";
 
 function Home(props) {
   return (
-    <Stack>
-      <Flex position={"fixed"} top={0} left={0} right={0}>
+    <Stack minH={"100vh"} position={"relative"}>
+      <Flex position={"sticky"} top={0} left={0} right={0} zIndex={9999}>
         <Header
           isVisibleLocation={true}
           setLocation={(city, district) => console.log(city, district)}
@@ -24,11 +24,11 @@ function Home(props) {
           }}
         />
       </Flex>
-      <Stack pt={"60px"} pb={"80px"} px={2}>
+      <Stack px={2} flex={1}>
         <Banner />
         <Category onChange={(e) => console.log(e)} />
       </Stack>
-      <Flex position={"fixed"} bottom={0} left={0} right={0}>
+      <Flex position={"sticky"} bottom={0} left={0} right={0}>
         <BottomNavigation />
       </Flex>
     </Stack>

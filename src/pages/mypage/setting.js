@@ -151,16 +151,32 @@ function Setting(props) {
     imageRef.current.value = null;
   };
 
-  const handleDeleteUser = () => {
-    deleteUser(auth.currentUser)
-      .then(() => {
-        console.log("User deleted.");
+  const deleteUser = async () => {
+    try {
+      console.log(auth.currentUser.uid);
+      const response = await fetch(
+        "https://us-central1-motionbit-doc.cloudfunctions.net/api/deleteUser",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ uid: auth.currentUser.uid }), // 유저 UID를 요청의 body에 포함
+        }
+      );
+
+      if (response.ok) {
+        const result = await response.text();
+        console.log(result); // 성공 메시지
         auth.signOut();
         navigate("/login");
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+      } else {
+        const errorMessage = await response.text();
+        console.error("Error:", errorMessage);
+      }
+    } catch (error) {
+      console.error("Error making request:", error);
+    }
   };
 
   return (
@@ -251,7 +267,7 @@ function Setting(props) {
               color={"gray.500"}
               variant={"unstyled"}
               cursor={"pointer"}
-              onClick={() => handleDeleteUser()}
+              onClick={() => deleteUser()}
             >
               탈퇴하기
             </Text>
@@ -259,7 +275,7 @@ function Setting(props) {
         </Stack>
       </VStack>
 
-      <Flex position={"fixed"} bottom={0} left={0} right={0}>
+      <Flex position={"sticky"} bottom={0} left={0} right={0}>
         <Button
           isDisabled={
             !(formData.name !== defaultValue.name) &&

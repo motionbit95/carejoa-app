@@ -41,12 +41,19 @@ function Login(props) {
   };
 
   return (
-    <Stack minH={"100vh"} justifyContent={"center"}>
-      <Stack position={"fixed"} top={0} left={0} right={0} spacing={0}>
+    <Stack minH={"100vh"}>
+      <Stack position={"sticky"} top={0} left={0} right={0} spacing={0}>
         <Header title={"로그인"} customButton={<></>} />
       </Stack>
 
-      <VStack w={"full"} p={4} spacing={8} pb={16}>
+      <VStack
+        w={"full"}
+        flex={1}
+        p={8}
+        spacing={8}
+        pb={16}
+        justifyContent={"center"}
+      >
         <Heading>CareJOA</Heading>
 
         <form style={{ width: "100%" }} onSubmit={onLogin}>
@@ -87,9 +94,6 @@ function Login(props) {
           justifyContent={"center"}
           spacing={4}
         >
-          <Text as={"button"} onClick={() => navigate("/find/email")}>
-            이메일 찾기
-          </Text>
           <Text as={"button"} onClick={() => navigate("/find/password")}>
             비밀번호 찾기
           </Text>

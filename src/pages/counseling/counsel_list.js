@@ -69,7 +69,7 @@ function CounselList(props) {
     console.log(id);
     if (window.confirm("상담지를 삭제하시겠습니까?")) {
       fetch(
-        `http://127.0.0.1:5004/motionbit-doc/us-central1/deleteDocument?subCollection=COUNSELING&documentId=${id}`
+        `https://us-central1-motionbit-doc.cloudfunctions.net/api/deleteDocument?subCollection=COUNSELING&documentId=${id}`
       )
         .then((response) => response.json())
         .then((data) => {
@@ -83,12 +83,12 @@ function CounselList(props) {
   }
 
   return (
-    <Stack bgColor={"gray.100"} minH={"100vh"}>
-      <Flex position={"fixed"} top={0} left={0} right={0}>
+    <Stack bgColor={"gray.100"} minH={"100vh"} position={"relative"}>
+      <Flex position={"sticky"} top={0} left={0} right={0}>
         <Header title={"상담 목록"} />
       </Flex>
       {counselList && (
-        <Stack pt={"52px"} pb={"80px"}>
+        <Stack flex={1}>
           {counselList?.length === 0 ? (
             <VStack p={4} spacing={8} justifyContent={"center"} minH={"500px"}>
               <VStack>
@@ -172,7 +172,7 @@ function CounselList(props) {
         </Stack>
       )}
       <Circle
-        position={"fixed"}
+        position={"absolute"}
         bottom={"80px"}
         right={4}
         bgColor={"blue.400"}
@@ -184,7 +184,7 @@ function CounselList(props) {
       >
         <FiPlus size={54} color="white" />
       </Circle>
-      <Flex position={"fixed"} bottom={0} left={0} right={0}>
+      <Flex position={"sticky"} bottom={0} left={0} right={0}>
         <BottomNavigation />
       </Flex>
     </Stack>

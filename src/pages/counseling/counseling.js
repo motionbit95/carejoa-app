@@ -190,7 +190,7 @@ function Counseling(props) {
   }, [step]);
 
   return (
-    <Stack bgColor={"gray.100"} minH={"100vh"}>
+    <Stack bgColor={"gray.100"} minH={"100vh"} position={"relative"}>
       <Stack position={"sticky"} top={0} left={0} right={0} spacing={0}>
         <Header title={"상담신청"} />
         <HStack
@@ -210,7 +210,7 @@ function Counseling(props) {
           <Text>{parseInt((step * 100) / questions.length)}%</Text>
         </HStack>
       </Stack>
-      <Stack pb={"80px"}>
+      <Stack flex={1}>
         <Stack w={"full"} p={4}>
           {questions.map(
             (question, index) =>
@@ -401,7 +401,7 @@ function Counseling(props) {
           )}
         </Stack>
       </Stack>
-      <Flex position={"fixed"} bottom={0} left={0} right={0}>
+      <Flex position={"sticky"} bottom={0} left={0} right={0}>
         <BottomNavigation />
       </Flex>
     </Stack>

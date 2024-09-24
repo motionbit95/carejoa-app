@@ -38,34 +38,34 @@ function MyPage(props) {
   }, []);
   return (
     <Stack>
-      <Stack position={"sticky"} top={0} left={0} right={0} spacing={0}>
+      <Stack
+        position={"sticky"}
+        top={0}
+        left={0}
+        right={0}
+        spacing={0}
+        zIndex={9999}
+      >
         <Header title={"마이페이지"} customButton={<></>} />
       </Stack>
 
       {state.isLogin ? (
-        <Stack divider={<StackDivider />} spacing={4} p={4} pb={"80px"}>
+        <Stack divider={<StackDivider />} spacing={4} p={4} flex={1}>
           {/* 프로필 */}
           <Stack spacing={4}>
-            <HStack
-              spacing={4}
-              w={"full"}
-              justifyContent={"space-between"}
-              p={3}
-            >
-              <Avatar size={"lg"} src={user?.photoURL} />
-              <Stack w={"full"} spacing={1}>
-                <Text fontSize={"lg"} fontWeight={"bold"}>
-                  {user?.displayName}
-                </Text>
-                <Text color={"gray.500"} fontSize={"sm"}>
-                  {user?.email}
-                </Text>
-              </Stack>
-              <Button
-                borderRadius={"full"}
-                w={"full"}
-                onClick={() => navigate("setting")}
-              >
+            <HStack spacing={4} w={"full"} justifyContent={"space-between"}>
+              <HStack>
+                <Avatar size={"lg"} src={user?.photoURL} />
+                <Stack w={"full"} spacing={1}>
+                  <Text fontSize={"lg"} fontWeight={"bold"}>
+                    {user?.displayName}
+                  </Text>
+                  <Text color={"gray.500"} fontSize={"sm"}>
+                    {user?.email}
+                  </Text>
+                </Stack>
+              </HStack>
+              <Button borderRadius={"full"} onClick={() => navigate("setting")}>
                 계정설정
               </Button>
             </HStack>
@@ -92,11 +92,19 @@ function MyPage(props) {
               <Text>관심시설</Text>
               <Icon as={FiChevronRight} />
             </HStack>
-            <HStack justifyContent={"space-between"}>
+            <HStack
+              justifyContent={"space-between"}
+              cursor={"pointer"}
+              onClick={() => navigate("/counseling")}
+            >
               <Text>상담내역</Text>
               <Icon as={FiChevronRight} />
             </HStack>
-            <HStack justifyContent={"space-between"}>
+            <HStack
+              justifyContent={"space-between"}
+              cursor={"pointer"}
+              onClick={() => navigate("/review", { state: { uid: user.uid } })}
+            >
               <Text>이용후기</Text>
               <Icon as={FiChevronRight} />
             </HStack>
@@ -171,7 +179,7 @@ function MyPage(props) {
         </VStack>
       )}
 
-      <Flex position={"fixed"} bottom={0} left={0} right={0}>
+      <Flex position={"sticky"} bottom={0} left={0} right={0}>
         <BottomNavigation />
       </Flex>
     </Stack>

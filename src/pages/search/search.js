@@ -28,6 +28,7 @@ import BottomNavigation from "../../component/bottom_nav";
 import Advertise from "./advertise";
 import SelectLocation from "./select_location";
 import SelectTypeCode, { facility } from "./select_typecode";
+import Loading from "../../component/loading";
 
 // XML 데이터를 JSON으로 변환하는 함수
 export function xmlToJson(xml) {
@@ -105,8 +106,13 @@ function Search(props) {
 
   // 요양병원 리스트
   const [hospitalList, setHospitalList] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+    setItems([]);
+    setHospitalList([]);
+    setIsLoading(true);
+
     // 시설이 변경되었을 때 해당 코드를 수행합니다.
     if (selectType === "요양병원") {
       // 요양병원일 경우 병원 검색 API를 수행합니다.
@@ -250,6 +256,8 @@ function Search(props) {
             }
           });
         }
+
+        setIsLoading(false);
       })
       .catch((error) => {
         console.log(error);
@@ -348,7 +356,10 @@ function Search(props) {
                           ...json2.response?.body?.item,
                           ...generalData[0],
                         });
-                        if (list.length === items.length) setItems(list);
+                        if (list.length === items.length) {
+                          setItems(list);
+                          setIsLoading(false);
+                        }
                       })
                       .catch((error) => console.error(error));
                   })
@@ -387,7 +398,8 @@ function Search(props) {
   }, []);
 
   return (
-    <Stack pb={"70px"}>
+    <Stack minH={"100vh"} position={"relative"}>
+      {isLoading && <Loading />}
       <Stack p={2}>
         <HStack>
           <HStack justifyContent={"space-between"} w={"full"}>
@@ -457,6 +469,7 @@ function Search(props) {
       <Stack
         bgColor={useColorModeValue("gray.100", "gray.900")}
         position={"relative"}
+        flex={1}
       >
         {selectType !== "요양병원" &&
           items.map((value, index) => (
@@ -557,7 +570,7 @@ function Search(props) {
         currentPage={parseInt(pageNo)}
         setCurrentPage={(pageNo) => setPageNo(parseInt(pageNo))}
       />
-      <Flex position={"fixed"} bottom={0} left={0} right={0}>
+      <Flex position={"sticky"} bottom={0} left={0} right={0}>
         <BottomNavigation />
       </Flex>
     </Stack>

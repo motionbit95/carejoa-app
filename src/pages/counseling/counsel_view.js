@@ -142,7 +142,7 @@ function CounselView(props) {
       <Modal
         isOpen={isOpen}
         onClose={onClose}
-        size={{ base: "full", md: "sm" }}
+        size={{ base: "full", md: "md" }}
       >
         <ModalOverlay />
         <ModalContent>

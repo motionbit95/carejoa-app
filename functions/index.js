@@ -121,6 +121,33 @@ exports.getFacilityGrade = onRequest(async (req, res) => {
   }
 });
 
+exports.getDocument = onRequest(async (req, res) => {
+  const collectionName = req.query.collection; // 예시: 'carejoa'
+  const docId = req.query.docId;
+
+  console.log(collectionName, docId);
+
+  try {
+    // 'users' 컬렉션에서 'age' 필드가 25 이상인 문서를 쿼리
+    const docRef = await db
+      .collection("database")
+      .doc("carejoa")
+      .collection(collectionName)
+      .doc(docId);
+
+    docRef.get().then((doc) => {
+      if (doc.exists) {
+        return res.status(200).json({ ...doc.data(), id: doc.id });
+      } else {
+        return res.status(404).json({ message: "No matching documents found" });
+      }
+    });
+  } catch (error) {
+    console.error("Error fetching documents:", error);
+    return res.status(500).json({ error: error.message });
+  }
+});
+
 exports.saveDocument = onRequest(async (req, res) => {
   const userId = "carejoa"; // 예시: 'carejoa'
   const subCollection = req.query.subCollection; // 예시: 'request'
@@ -143,29 +170,6 @@ exports.saveDocument = onRequest(async (req, res) => {
   } catch (error) {
     console.error("Error saving document:", error);
     res.status(500).send("Error saving document");
-  }
-});
-
-exports.deleteDocument = onRequest(async (req, res) => {
-  const userId = "carejoa"; // 예시: 'carejoa'
-  const subCollection = req.query.subCollection; // 예시: 'request'
-  const documentId = req.query.documentId; // 예시: 'documentId'
-
-  try {
-    // 특정 사용자의 하위 컬렉션 참조
-    const subCollectionRef = db
-      .collection("database")
-      .doc(userId)
-      .collection(subCollection);
-
-    // 문서를 삭제합니다.
-    await subCollectionRef.doc(documentId).delete();
-
-    // 성공적으로 문서가 삭제되었음을 응답
-    res.status(200).send({ message: "Document successfully deleted." });
-  } catch (error) {
-    console.error("Error deleting document:", error);
-    res.status(500).send("Error deleting document");
   }
 });
 
@@ -218,43 +222,6 @@ exports.getCounsel = onRequest(async (req, res) => {
         return res.status(404).json({ message: "No matching documents found" });
       }
     });
-  } catch (error) {
-    console.error("Error fetching documents:", error);
-    return res.status(500).json({ error: error.message });
-  }
-});
-
-exports.getReviews = onRequest(async (req, res) => {
-  try {
-    const { page = 1, limit = 10 } = req.query; // 쿼리 파라미터에서 페이지와 개수 가져오기
-
-    const pageNum = parseInt(page);
-    const limitNum = parseInt(limit);
-    const offset = (pageNum - 1) * limitNum; // 오프셋 계산
-
-    // 'users' 컬렉션에서 'age' 필드가 25 이상인 문서를 쿼리
-    const querySnapshot = await db
-      .collection("database")
-      .doc("carejoa")
-      .collection("REVIEWS")
-      .orderBy("createdAt") // 정렬할 필드 이름 입력
-      .offset(offset) // 오프셋 적용
-      .limit(limitNum) // 제한 개수 적용
-      .get();
-
-    // 쿼리 결과가 비어있는지 확인
-    if (querySnapshot.empty) {
-      return res.status(404).json({ message: "No matching documents found" });
-    }
-
-    // 쿼리 결과를 배열로 저장
-    let docs = [];
-    querySnapshot.forEach((doc) => {
-      docs.push({ ...doc.data(), id: doc.id });
-    });
-
-    // 쿼리 결과 반환
-    return res.status(200).json(docs);
   } catch (error) {
     console.error("Error fetching documents:", error);
     return res.status(500).json({ error: error.message });
@@ -338,6 +305,31 @@ exports.addUser = onRequest(async (req, res) => {
   }
 });
 
+// Firebase Function: POST 요청을 통해 유저 삭제
+app.post("/deleteUser", async (req, res) => {
+  console.log("deleteUser", req.body.uid);
+  // POST 메서드인지 확인
+  if (req.method !== "POST") {
+    return res.status(405).send("Method Not Allowed");
+  }
+
+  const { uid } = req.body; // 요청의 body에서 uid 가져오기
+
+  // uid가 없을 경우 에러 반환
+  if (!uid) {
+    return res.status(400).send("Missing uid");
+  }
+
+  try {
+    // Firebase Authentication에서 유저 삭제
+    await admin.auth().deleteUser(uid);
+    return res.status(200).send(`Successfully deleted user with uid: ${uid}`);
+  } catch (error) {
+    console.error("Error deleting user:", error);
+    return res.status(500).send(`Error deleting user: ${error.message}`);
+  }
+});
+
 app.get("/getUserInfo", async (req, res) => {
   const { uid } = req.query;
   // const uid = req.body.uid; // 클라이언트에서 UID 받기
@@ -355,6 +347,104 @@ app.get("/getUserInfo", async (req, res) => {
   } catch (error) {
     console.error("Error fetching user data:", error);
     res.status(500).send("Error fetching user data");
+  }
+});
+
+app.get("/getDocuments", async (req, res) => {
+  try {
+    const { collectionName, order, page, limit } = req.query; // 쿼리 파라미터에서 페이지와 개수 가져오기
+
+    const pageNum = parseInt(page);
+    const limitNum = parseInt(limit);
+    const offset = (pageNum - 1) * limitNum; // 오프셋 계산
+
+    // 'users' 컬렉션에서 'age' 필드가 25 이상인 문서를 쿼리
+    const querySnapshot = await db
+      .collection("database")
+      .doc("carejoa")
+      .collection(collectionName)
+      .orderBy(order) // 정렬할 필드 이름 입력
+      // .offset(offset) // 오프셋 적용
+      // .limit(limitNum) // 제한 개수 적용
+      .get();
+
+    // 쿼리 결과가 비어있는지 확인
+    if (querySnapshot.empty) {
+      return res.status(404).json({ message: "No matching documents found" });
+    }
+
+    // 쿼리 결과를 배열로 저장
+    let docs = [];
+    querySnapshot.forEach((doc) => {
+      docs.push({ ...doc.data(), id: doc.id });
+    });
+
+    // 쿼리 결과 반환
+    return res.status(200).json(docs);
+  } catch (error) {
+    console.error("Error fetching documents:", error);
+    return res.status(500).json({ error: error.message });
+  }
+});
+
+app.get("/deleteDocument", async (req, res) => {
+  const userId = "carejoa"; // 예시: 'carejoa'
+  const subCollection = req.query.subCollection; // 예시: 'request'
+  const documentId = req.query.documentId; // 예시: 'documentId'
+
+  try {
+    // 특정 사용자의 하위 컬렉션 참조
+    const subCollectionRef = db
+      .collection("database")
+      .doc(userId)
+      .collection(subCollection);
+
+    // 문서를 삭제합니다.
+    await subCollectionRef.doc(documentId).delete();
+
+    // 성공적으로 문서가 삭제되었음을 응답
+    res.status(200).send({ message: "Document successfully deleted." });
+  } catch (error) {
+    console.error("Error deleting document:", error);
+    res.status(500).send("Error deleting document");
+  }
+});
+
+app.get("/getReviews", async (req, res) => {
+  try {
+    const { page = 1, limit = 10, uid } = req.query; // 쿼리 파라미터에서 페이지와 개수 가져오기
+
+    const pageNum = parseInt(page);
+    const limitNum = parseInt(limit);
+    const offset = (pageNum - 1) * limitNum; // 오프셋 계산
+
+    // 'users' 컬렉션에서 'age' 필드가 25 이상인 문서를 쿼리
+    const querySnapshot = await db
+      .collection("database")
+      .doc("carejoa")
+      .collection("REVIEWS")
+      .orderBy("createdAt") // 정렬할 필드 이름 입력
+      .where("userId", "==", uid)
+      // .offset(offset) // 오프셋 적용
+      // .limit(limitNum) // 제한 개수 적용
+      .get();
+
+    // 쿼리 결과가 비어있는지 확인
+    if (querySnapshot.empty) {
+      return res.status(404).json({ message: "No matching documents found" });
+    }
+
+    // 쿼리 결과를 배열로 저장
+    let docs = [];
+    querySnapshot.forEach((doc) => {
+      docs.push({ ...doc.data(), id: doc.id });
+    });
+
+    // 쿼리 결과 반환
+    return res.status(200).json(docs);
+  } catch (error) {
+    console.error("Error fetching documents:", error);
+    return res.status(500).json({ error: error.message });
   }
 });
 

@@ -1,4 +1,4 @@
-import { RadioGroup, Stack, Box } from "@chakra-ui/react";
+import { RadioGroup, Stack, Box, Heading } from "@chakra-ui/react";
 import { useState } from "react";
 
 function RadioButtonGroup(props) {
@@ -6,8 +6,8 @@ function RadioButtonGroup(props) {
 
   return (
     <RadioGroup onChange={setValue} value={value}>
-      <Stack direction="row" spacing={4} w={"full"}>
-        {props.list.map((item) => (
+      <Stack direction="row" spacing={0} w={"full"}>
+        {props.list.map((item, index) => (
           <Box
             key={item}
             w={"full"}
@@ -21,7 +21,9 @@ function RadioButtonGroup(props) {
             px={5}
             py={3}
             borderWidth="1px"
-            borderRadius="md"
+            // borderRadius="md"
+            borderLeftRadius={index === 0 ? "lg" : "none"}
+            borderRightRadius={index === props.list.length - 1 ? "lg" : "none"}
             cursor="pointer"
             _focus={{ boxShadow: "none" }}
           >
