@@ -88,7 +88,11 @@ function MyPage(props) {
           {/* 나의활동 */}
           <Stack spacing={4}>
             <Heading size={"md"}>나의 활동</Heading>
-            <HStack justifyContent={"space-between"}>
+            <HStack
+              justifyContent={"space-between"}
+              cursor={"pointer"}
+              onClick={() => navigate("/goods", { state: { uid: user.uid } })}
+            >
               <Text>관심시설</Text>
               <Icon as={FiChevronRight} />
             </HStack>

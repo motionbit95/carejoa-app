@@ -10,7 +10,9 @@ import {
   Icon,
 } from "@chakra-ui/react";
 import { FiMapPin } from "react-icons/fi";
-import { regionMap } from "../data";
+import { regionMap, siDoCd_2, siGunGuCd_2 } from "../data";
+import { serviceKey, xmlToJson } from "../pages/search/search";
+import Loading from "./loading";
 
 function toRadians(degrees) {
   return degrees * (Math.PI / 180);
@@ -167,6 +169,197 @@ export const KakaoMapLocation = (props) => {
         <p>위치 정보를 가져오는 중...</p>
       )}
     </Box>
+  );
+};
+
+export const KakaoMap = (props) => {
+  const [currentPosition, setCurrentPosition] = useState(null);
+  const [selectedLocation, setSelectedLocation] = useState(null);
+  const [locations, setLocations] = useState([]);
+  const [selectedMarker, setSelectedMarker] = useState(null);
+
+  useEffect(() => {
+    props.onSelect(selectedLocation);
+  }, [selectedLocation]);
+
+  // 지도 이동 시 발생하는 이벤트 핸들러 (idle 이벤트)
+  const updateRegionInfo = (map) => {
+    const center = map.getCenter(); // 지도 중심 좌표 가져오기
+    // 주소-좌표 변환 객체 생성
+    const geocoder = new window.kakao.maps.services.Geocoder();
+    // 중심 좌표를 이용해 행정구역 정보를 요청
+    geocoder.coord2RegionCode(
+      center.getLng(),
+      center.getLat(),
+      (result, status) => {
+        if (status === window.kakao.maps.services.Status.OK) {
+          // const regionInfo = `${result[0].region_1depth_name} ${result[0].region_2depth_name} ${result[0].region_3depth_name}`;
+          // console.log(regionInfo);
+
+          let sidoCd = siDoCd_2[regionMap[result[0].region_1depth_name]];
+          let sgguCd =
+            siGunGuCd_2[regionMap[result[0].region_1depth_name]][
+              result[0].region_2depth_name.replace("시 ", "")
+            ];
+
+          const url = `https://apis.data.go.kr/B551182/hospInfoServicev2/getHospBasisList?serviceKey=${serviceKey}&sidoCd=${sidoCd}&sgguCd=${sgguCd}&clCd=28`;
+
+          fetch(url)
+            .then((response) => response.text())
+            .then((data) => {
+              // DOMParser를 사용해 XML 문자열을 XML 객체로 변환
+              const parser = new DOMParser();
+              const xmlDoc = parser.parseFromString(data, "application/xml");
+              // XML 객체를 JSON으로 변환
+              const json = xmlToJson(xmlDoc);
+
+              let hospitalList = json.response.body.items.item;
+              let tempList = [];
+              hospitalList.forEach((item) => {
+                let temp = {
+                  id: item.ykiho.text,
+                  name: item.yadmNm.text,
+                  lat: parseFloat(item.YPos.text),
+                  lng: parseFloat(item.XPos.text),
+                  imageUrl: require(`../assets/icons/HiLocationMarker_blue.png`),
+                };
+
+                tempList.push(temp);
+                if (tempList.length === hospitalList.length) {
+                  setLocations(tempList);
+                }
+
+                // 마커 클릭 시 인포윈도우를 열기 위한 함수
+                const createMarkerClickListener = (marker, location) => {
+                  return () => {
+                    setSelectedMarker(marker);
+                    setSelectedLocation(location);
+                  };
+                };
+
+                const markerPosition = new window.kakao.maps.LatLng(
+                  currentPosition.latitude,
+                  currentPosition.longitude
+                );
+
+                const markerImage = new window.kakao.maps.MarkerImage(
+                  require(`../assets/icons/BiCurrentLocation.png`), // 사용자 정의 이미지 URL
+                  new window.kakao.maps.Size(36, 36) // 마커 크기
+                );
+
+                const marker = new window.kakao.maps.Marker({
+                  position: markerPosition,
+                  image: markerImage,
+                });
+
+                marker.setMap(map);
+
+                tempList.forEach((location) => {
+                  const markerPosition = new window.kakao.maps.LatLng(
+                    location.lat,
+                    location.lng
+                  );
+
+                  const markerImage = new window.kakao.maps.MarkerImage(
+                    require(`../assets/icons/HiLocationMarker_blue.png`), // 사용자 정의 이미지 URL
+                    new window.kakao.maps.Size(36, 36) // 마커 크기
+                  );
+
+                  const marker = new window.kakao.maps.Marker({
+                    position: markerPosition,
+                    image: markerImage,
+                  });
+
+                  // 마커 클릭 이벤트 등록
+                  window.kakao.maps.event.addListener(
+                    marker,
+                    "click",
+                    createMarkerClickListener(marker, location)
+                  );
+                  marker.setMap(map); // 마커를 지도에 표시
+                });
+              });
+
+              // setHospitalList(data.response.body.items.item);
+            })
+            .catch((error) => {
+              console.log(error);
+            });
+        }
+      }
+    );
+  };
+
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const latitude = position.coords.latitude;
+          const longitude = position.coords.longitude;
+          setCurrentPosition({ latitude, longitude });
+        },
+        (error) => {
+          console.error("위치 정보를 가져오는데 실패했습니다.", error);
+          setCurrentPosition({
+            latitude: 37.566826,
+            longitude: 126.9786567,
+          });
+          alert("위치 정보를 가져오는데 실패했습니다.");
+        }
+      );
+    }
+  }, []);
+
+  useEffect(() => {
+    if (currentPosition) {
+      // Kakao Maps API를 불러오는 스크립트 동적으로 추가
+      const script = document.createElement("script");
+      script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=2d045f8344d78f996255cb39c9bd9055&autoload=false`;
+      document.head.appendChild(script);
+
+      // 스크립트 로드 완료 후 지도 생성
+      script.onload = () => {
+        window.kakao.maps.load(() => {
+          const container = document.getElementById("map"); // 지도를 표시할 div
+          const options = {
+            center: new window.kakao.maps.LatLng(
+              currentPosition.latitude,
+              currentPosition.longitude
+            ), // 초기 중심 좌표 (서울)
+            level: 6, // 지도의 확대 레벨
+          };
+          const map = new window.kakao.maps.Map(container, options); // 지도 생성
+
+          updateRegionInfo(map);
+
+          // 지도 이동 또는 확대/축소가 끝난 후 호출되는 이벤트
+          window.kakao.maps.event.addListener(map, "idle", function () {
+            updateRegionInfo(map);
+          });
+        });
+      };
+
+      // 컴포넌트가 unmount 될 때 스크립트 제거
+      return () => document.head.removeChild(script);
+    }
+  }, [currentPosition]);
+
+  return (
+    <>
+      {currentPosition ? (
+        <div
+          id="map"
+          style={{
+            width: "100%",
+            height: "100vh",
+          }}
+        />
+      ) : (
+        <Stack minH={"100vh"}>
+          <Loading />
+        </Stack>
+      )}
+    </>
   );
 };
 

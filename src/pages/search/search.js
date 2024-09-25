@@ -164,6 +164,8 @@ function Search(props) {
 
     const paramUrl = `${url}&sidoCd=${sidoCd}&sgguCd=${sgguCd}&clCd=${clCd}&pageNo=${pageNo}&numOfRows=${numOfRows}&yadmNm=${keyword}`;
 
+    console.log(paramUrl);
+
     // 데이터를 받아옵니다.
     fetch(paramUrl)
       .then((response) => {

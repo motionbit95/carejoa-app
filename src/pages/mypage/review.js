@@ -52,7 +52,7 @@ function Review(props) {
       <Header title={"나의 이용후기"} customButton={<></>} />
       <Stack flex={1}>
         {myReviews.map((review) => (
-          <Stack bgColor={"white"} p={2}>
+          <Stack bgColor={"white"} p={4}>
             <HStack justifyContent={"space-between"}>
               <Stack spacing={0}>
                 <Text fontWeight={"bold"} fontSize={"lg"}>

@@ -25,6 +25,8 @@ import SignUp from "./pages/mypage/signup";
 import Find from "./pages/mypage/find";
 import Review from "./pages/mypage/review";
 import Detail from "./pages/search/detail";
+import Goods from "./pages/mypage/goods";
+import MapSearch from "./pages/search/map_search";
 
 function App() {
   return (
@@ -36,6 +38,7 @@ function App() {
               <Route path="*" element={<Home />} />
               <Route path="/home" element={<Home />} />
               <Route path="/search" element={<Search />} />
+              <Route path="/mapsearch" element={<MapSearch />} />
               <Route path="/detail/*" element={<Detail />} />
               <Route path="/community/*" element={<CommunityList />} />
               <Route
@@ -46,7 +49,8 @@ function App() {
               <Route path="/counseling/register" element={<Counseling />} />
               <Route path="/counseling/view*" element={<CounselView />} />
               <Route path="/mypage" element={<MyPage />} />
-              <Route path="/review" element={<Review />} />
+              <Route path="/review/*" element={<Review />} />
+              <Route path="/goods/*" element={<Goods />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<SignUp />} />
               <Route path="/find/*" element={<Find />} />

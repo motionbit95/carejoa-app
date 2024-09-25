@@ -71,11 +71,15 @@ function Detail(props) {
 
           // XML 객체를 JSON으로 변환
           const json = xmlToJson(xmlDoc);
-          console.log(json);
           let items = json.response.body.items.item;
 
-          console.log(items);
-          setDetailData(items);
+          if (json.response.body.totalCount.text === "0") {
+            setDetailData([]);
+          } else if (json.response.body.totalCount.text === "1") {
+            setDetailData([items]);
+          } else {
+            setDetailData(items);
+          }
         })
         .catch((error) => {
           console.error(error);
