@@ -24,6 +24,7 @@ import CommunityRegister from "./pages/community/community_register";
 import SignUp from "./pages/mypage/signup";
 import Find from "./pages/mypage/find";
 import Review from "./pages/mypage/review";
+import Detail from "./pages/search/detail";
 
 function App() {
   return (
@@ -35,6 +36,7 @@ function App() {
               <Route path="*" element={<Home />} />
               <Route path="/home" element={<Home />} />
               <Route path="/search" element={<Search />} />
+              <Route path="/detail/*" element={<Detail />} />
               <Route path="/community/*" element={<CommunityList />} />
               <Route
                 path="/community/register"

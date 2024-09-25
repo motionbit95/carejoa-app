@@ -29,6 +29,7 @@ import Advertise from "./advertise";
 import SelectLocation from "./select_location";
 import SelectTypeCode, { facility } from "./select_typecode";
 import Loading from "../../component/loading";
+import { auth } from "../../firebase/config";
 
 // XML 데이터를 JSON으로 변환하는 함수
 export function xmlToJson(xml) {
@@ -84,14 +85,13 @@ export const serviceKey =
 
 function Search(props) {
   // 표시할 리스트
+  const navigate = useNavigate();
   const [selectCity, setSelectCity] = useState("서울");
   const [selectDistrict, setSelectDistrict] = useState("강남구");
   const [selectType, setSelectType] = useState("요양병원");
   const [tempKeyword, setTempKeyword] = useState("");
   const [keyword, setKeyword] = useState("");
-  const [goods, setGoods] = useState([
-    "JDQ4MTg4MSM1MSMkMSMkMCMkOTkkNTgxMzUxIzIxIyQxIyQ1IyQ3OSQyNjEyMjIjNjEjJDEjJDQjJDgz",
-  ]);
+  const [goods, setGoods] = useState([]);
 
   const [cityCode, setCityCode] = useState("");
   const [districtCode, setDistrictCode] = useState("");
@@ -107,6 +107,30 @@ function Search(props) {
   // 요양병원 리스트
   const [hospitalList, setHospitalList] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+
+  const [userInfo, setUserInfo] = useState({});
+
+  useEffect(() => {
+    const getUser = async (uid) => {
+      fetch(
+        `http://127.0.0.1:5004/motionbit-doc/us-central1/getDocument?collection=USERS&docId=${uid}`
+      )
+        .then((response) => response.json())
+        .then((data) => {
+          console.log(data);
+          setGoods(data.goods);
+          setUserInfo(data);
+        })
+        .catch((error) => console.log(error));
+    };
+    auth.onAuthStateChanged((user) => {
+      if (!user) {
+        console.log("user is not logged in");
+      } else {
+        getUser(user.uid);
+      }
+    });
+  }, []);
 
   useEffect(() => {
     setItems([]);
@@ -372,6 +396,41 @@ function Search(props) {
       .catch((error) => console.error(error));
   };
 
+  const handleGoods = (data) => {
+    let temp = goods;
+    if (goods.includes(data)) {
+      temp = goods.filter((item) => item !== data);
+      setGoods(temp);
+      alert("관심시설에서 삭제되었습니다.");
+    } else {
+      temp = [...goods, data];
+      setGoods(temp);
+      alert("관심시설에 등록되었습니다.");
+    }
+
+    console.log(temp);
+
+    fetch(
+      `https://us-central1-motionbit-doc.cloudfunctions.net/api/updateDocument?subCollection=USERS&documentId=${auth.currentUser.uid}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          goods: temp,
+        }),
+      }
+    )
+      .then((response) => response.json())
+      .then((response) => {
+        console.log(response);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
   useEffect(() => {
     setCityCode(siDoCd[selectCity]);
     setDistrictCode(siGunGuCd[selectCity][selectDistrict].slice(2, 5));
@@ -473,7 +532,15 @@ function Search(props) {
       >
         {selectType !== "요양병원" &&
           items.map((value, index) => (
-            <Stack key={index} bgColor={"white"} p={4}>
+            <Stack
+              key={index}
+              bgColor={"white"}
+              p={4}
+              cursor={"pointer"}
+              onClick={() =>
+                navigate(`/detail/facility/${value.longTermAdminSym}`)
+              }
+            >
               {/* <Box>
             <Badge colorScheme="blue">
               {adminPttnCd[value.adminPttnCd.text]}
@@ -523,6 +590,7 @@ function Search(props) {
             <Stack key={index} bgColor={"white"} p={4} position={"relative"}>
               <Box position={"absolute"} right={0} bottom={2}>
                 <IconButton
+                  onClick={() => handleGoods(value.ykiho)}
                   variant={"unstyled"}
                   icon={
                     goods.includes(value.ykiho) ? (
@@ -533,24 +601,29 @@ function Search(props) {
                   }
                 />
               </Box>
-              <Text fontWeight={"bold"} fontSize={"lg"}>
-                {value.yadmNm}
-              </Text>
-              <Text color={"gray.500"} fontSize={"sm"}>
-                {value.addr}
-              </Text>
+              <Stack
+                cursor={"pointer"}
+                onClick={() => navigate(`/detail/hospital/${value.ykiho}`)}
+              >
+                <Text fontWeight={"bold"} fontSize={"lg"}>
+                  {value.yadmNm}
+                </Text>
+                <Text color={"gray.500"} fontSize={"sm"}>
+                  {value.addr}
+                </Text>
 
-              <HStack divider={<StackDivider borderColor="gray.200" />}>
-                <Distance
-                  pos={{
-                    xPos: value.XPos,
-                    yPos: value.YPos,
-                  }}
-                  currentPosition={currentPosition}
-                />
+                <HStack divider={<StackDivider borderColor="gray.200" />}>
+                  <Distance
+                    pos={{
+                      xPos: value.XPos,
+                      yPos: value.YPos,
+                    }}
+                    currentPosition={currentPosition}
+                  />
 
-                <Text>{value.telno}</Text>
-              </HStack>
+                  <Text>{value.telno}</Text>
+                </HStack>
+              </Stack>
               <HStack>
                 <Badge variant={"solid"}>{value.clCdNm}</Badge>
                 {value.estbDd && (

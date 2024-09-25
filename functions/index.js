@@ -387,6 +387,32 @@ app.get("/getDocuments", async (req, res) => {
   }
 });
 
+app.post("/updateDocument", async (req, res) => {
+  const userId = "carejoa"; // 예시: 'carejoa'
+  const subCollection = req.query.subCollection; // 예시: 'request'
+  const documentId = req.query.documentId; // 예시: 'documentId'
+  const documentData = req.body; // 예시: { title: 'updated title' }
+
+  try {
+    // 특정 사용자의 하위 컬렉션 참조
+    const subCollectionRef = db
+      .collection("database")
+      .doc(userId)
+      .collection(subCollection);
+
+    // 문서를 변경합니다.
+    await subCollectionRef
+      .doc(documentId)
+      .update(documentData, { merge: true });
+
+    // 성공적으로 문서가 변경되었음을 응답
+    res.status(200).send({ message: "Document successfully updated." });
+  } catch (error) {
+    console.error("Error updating document:", error);
+    res.status(500).send("Error updating document");
+  }
+});
+
 app.get("/deleteDocument", async (req, res) => {
   const userId = "carejoa"; // 예시: 'carejoa'
   const subCollection = req.query.subCollection; // 예시: 'request'
