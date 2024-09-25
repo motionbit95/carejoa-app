@@ -461,7 +461,7 @@ function Search(props) {
   return (
     <Stack minH={"100vh"} position={"relative"}>
       {isLoading && <Loading />}
-      <Stack p={2}>
+      <Stack p={2} position={"sticky"} top={0} bg={"white"} zIndex={999}>
         <HStack>
           <HStack justifyContent={"space-between"} w={"full"}>
             <Heading size={"md"}>희망하는 조건을 선택하세요.</Heading>
@@ -469,9 +469,16 @@ function Search(props) {
               <IconButton
                 icon={<FiBookmark size={20} />}
                 variant={"unstyle"}
-                onClick={() => (window.location.href = "/")}
+                onClick={() => {
+                  console.log(userInfo.uid);
+                  navigate("/goods", { state: { uid: userInfo.uid } });
+                }}
               />
-              <IconButton icon={<FiMap size={20} />} variant={"unstyle"} />
+              <IconButton
+                icon={<FiMap size={20} />}
+                variant={"unstyle"}
+                onClick={() => navigate("/mapsearch")}
+              />
             </HStack>
           </HStack>
         </HStack>

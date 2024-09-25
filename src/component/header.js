@@ -9,6 +9,7 @@ import React from "react";
 import { FiArrowLeft, FiBookmark, FiMap, FiSearch } from "react-icons/fi";
 import SelectLocation from "./select_location";
 import { useNavigate } from "react-router-dom";
+import { auth } from "../firebase/config";
 
 function Header(props) {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -72,9 +73,15 @@ function Header(props) {
             <IconButton
               icon={<FiSearch size={20} />}
               variant={"unstyle"}
-              onClick={() => (window.location.href = "/search")}
+              onClick={() => navigate("/search")}
             />
-            <IconButton icon={<FiBookmark size={20} />} variant={"unstyle"} />
+            <IconButton
+              icon={<FiBookmark size={20} />}
+              variant={"unstyle"}
+              onClick={() => {
+                navigate("/goods", { state: { uid: auth.currentUser.uid } });
+              }}
+            />
           </HStack>
         )}
       </HStack>

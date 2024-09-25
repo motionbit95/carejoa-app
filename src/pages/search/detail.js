@@ -15,6 +15,7 @@ import {
   Text,
 } from "@chakra-ui/react";
 import { FiArrowLeft, FiBookmark, FiImage } from "react-icons/fi";
+import { auth } from "../../firebase/config";
 
 function Detail(props) {
   const location = useLocation();
@@ -255,6 +256,10 @@ function Detail(props) {
           />
           <IconButton
             variant={"unstyle"}
+            onClick={() => {
+              console.log(auth.currentUser.uid);
+              navigate("/goods", { state: { uid: auth.currentUser.uid } });
+            }}
             icon={<Icon as={FiBookmark} boxSize={"24px"} />}
           />
         </HStack>
