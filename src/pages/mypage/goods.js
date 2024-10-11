@@ -25,7 +25,7 @@ function Goods(props) {
       )
         .then((response) => response.json())
         .then((data) => {
-          console.log(data.goods);
+          console.log(data);
           let tempList = [];
           data.goods?.forEach((item) => {
             if (item[0] === "J") {

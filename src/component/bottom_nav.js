@@ -29,7 +29,10 @@ function BottomNavigation(props) {
       borderTop={"1px solid #d9d9d9"}
     >
       <VStack onClick={() => movePage("home")} cursor={"pointer"}>
-        <Icon as={FiHome} color={page === "home" ? "blue.500" : "gray.500"} />
+        <Icon
+          as={FiHome}
+          color={page.includes("home") ? "blue.500" : "gray.500"}
+        />
         <Text
           color={page.includes("home") ? "blue.500" : "gray.500"}
           fontSize={"sm"}

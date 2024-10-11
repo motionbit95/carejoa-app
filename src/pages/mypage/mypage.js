@@ -142,10 +142,10 @@ function MyPage(props) {
               <Text>FAQ</Text>
               <Icon as={FiChevronRight} />
             </HStack>
-            <HStack justifyContent={"space-between"}>
+            {/* <HStack justifyContent={"space-between"}>
               <Text>가이드</Text>
               <Icon as={FiChevronRight} />
-            </HStack>
+            </HStack> */}
           </Stack>
         </Stack>
       ) : (

@@ -305,6 +305,90 @@ exports.addUser = onRequest(async (req, res) => {
   }
 });
 
+app.get("/", async (req, res) => {
+  return res.status(200).send("Hello World!");
+});
+
+app.post("/addCoupon", async (req, res) => {
+  const userId = "carejoa"; // 예시: 'carejoa'
+  const subCollection = "COUPON"; // 예시: 'request'
+  const documentData = req.body; // 요청 본문에서 저장할 데이터 받기
+
+  console.log(documentData, userId, subCollection);
+
+  try {
+    // 특정 사용자의 하위 컬렉션 참조
+    const subCollectionRef = db
+      .collection("database")
+      .doc(userId)
+      .collection(subCollection);
+
+    // 새 문서를 추가합니다.
+    const docRef = await subCollectionRef.doc(req.body.code).set(documentData);
+
+    // 성공적으로 문서가 저장되었음을 응답
+    res
+      .status(200)
+      .send({
+        id: docRef.id,
+        message: "Document successfully saved.",
+        data: documentData,
+      });
+  } catch (error) {
+    console.error("Error saving document:", error);
+    res.status(500).send("Error saving document");
+  }
+});
+
+app.get("/getCouponList", async (req, res) => {
+  const userId = "carejoa"; // 예시: 'carejoa'
+  const subCollection = "COUPON"; // 예시: 'request'
+
+  try {
+    // 특정 사용자의 하위 컬렉션 참조
+    const subCollectionRef = db
+      .collection("database")
+      .doc(userId)
+      .collection(subCollection);
+
+    // 새 문서를 가져오기
+    const documents = await subCollectionRef.get();
+    const couponList = documents.docs.map((doc) => doc.data());
+
+    return res.status(200).json(couponList);
+  } catch (error) {
+    console.error("Error fetching documents:", error);
+    return res.status(500).json({ error: error.message });
+  }
+});
+
+app.get("/getCoupon", async (req, res) => {
+  const collectionName = "COUPON"; // 예시: 'carejoa'
+  const docId = req.query.id;
+
+  console.log(collectionName, docId);
+
+  try {
+    // 'users' 컬렉션에서 'age' 필드가 25 이상인 문서를 쿼리
+    const docRef = await db
+      .collection("database")
+      .doc("carejoa")
+      .collection(collectionName)
+      .doc(docId);
+
+    docRef.get().then((doc) => {
+      if (doc.exists) {
+        return res.status(200).json({ ...doc.data(), id: doc.id });
+      } else {
+        return res.status(404).json({ message: "No matching documents found" });
+      }
+    });
+  } catch (error) {
+    console.error("Error fetching documents:", error);
+    return res.status(500).json({ error: error.message });
+  }
+});
+
 // Firebase Function: POST 요청을 통해 유저 삭제
 app.post("/deleteUser", async (req, res) => {
   console.log("deleteUser", req.body.uid);

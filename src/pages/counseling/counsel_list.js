@@ -16,6 +16,7 @@ import Header from "../../component/header";
 import BottomNavigation from "../../component/bottom_nav";
 import { useNavigate } from "react-router-dom";
 import { FiFile, FiPlus } from "react-icons/fi";
+import Loading from "../../component/loading";
 
 export function parsingDate(timestamp) {
   // 밀리초를 Date 객체로 변환
@@ -87,7 +88,7 @@ function CounselList(props) {
       <Flex position={"sticky"} top={0} left={0} right={0}>
         <Header title={"상담 목록"} />
       </Flex>
-      {counselList && (
+      {counselList ? (
         <Stack flex={1}>
           {counselList?.length === 0 ? (
             <VStack p={4} spacing={8} justifyContent={"center"} minH={"500px"}>
@@ -169,6 +170,10 @@ function CounselList(props) {
               </Stack>
             </>
           )}
+        </Stack>
+      ) : (
+        <Stack flex={1}>
+          <Loading />
         </Stack>
       )}
       <Circle

@@ -117,7 +117,6 @@ function Search(props) {
       )
         .then((response) => response.json())
         .then((data) => {
-          console.log(data);
           setGoods(data.goods);
           setUserInfo(data);
         })
@@ -399,13 +398,14 @@ function Search(props) {
   };
 
   const handleGoods = (data) => {
-    let temp = goods;
-    if (goods.includes(data)) {
+    let temp = goods ? goods : [];
+    console.log(goods);
+    if (goods?.includes(data)) {
       temp = goods.filter((item) => item !== data);
       setGoods(temp);
       alert("관심시설에서 삭제되었습니다.");
     } else {
-      temp = [...goods, data];
+      temp = [...temp, data];
       setGoods(temp);
       alert("관심시설에 등록되었습니다.");
     }
@@ -602,7 +602,7 @@ function Search(props) {
                   onClick={() => handleGoods(value.ykiho)}
                   variant={"unstyled"}
                   icon={
-                    goods.includes(value.ykiho) ? (
+                    goods?.includes(value.ykiho) ? (
                       <BsBookmarkFill size={20} color="#ecc94b" />
                     ) : (
                       <FiBookmark size={20} color="#8c8c8c" />
