@@ -37,7 +37,7 @@ function CommunityList(props) {
   useEffect(() => {
     const getUser = async (uid) => {
       fetch(
-        `http://127.0.0.1:5004/motionbit-doc/us-central1/getDocument?collection=USERS&docId=${uid}`
+        `${process.env.REACT_APP_SERVER_URL}/getDocument?collection=USERS&docId=${uid}`
       )
         .then((response) => response.json())
         .then((data) => {
@@ -69,7 +69,7 @@ function CommunityList(props) {
     const getReviews = () => {
       console.log(localStorage.getItem("tab"));
       fetch(
-        `https://us-central1-motionbit-doc.cloudfunctions.net/api/getDocuments?collectionName=REVIEWS&order=createdAt`
+        `${process.env.REACT_APP_SERVER_URL}/api/getDocuments?collectionName=REVIEWS&order=createdAt`
       )
         .then((response) => response.json())
         .then((data) => {
@@ -83,7 +83,7 @@ function CommunityList(props) {
             let list = [];
             data.forEach(async (review) => {
               fetch(
-                `https://us-central1-motionbit-doc.cloudfunctions.net/api/getUserInfo?uid=${review.userId}`
+                `${process.env.REACT_APP_SERVER_URL}/api/getUserInfo?uid=${review.userId}`
               )
                 .then((response) => response.json())
                 .then((result) => {
@@ -103,8 +103,11 @@ function CommunityList(props) {
     };
 
     const getNews = async () => {
+      console.log(
+        `${process.env.REACT_APP_SERVER_URL}/api/getDocuments?collectionName=NEWS&order=createdAt`
+      );
       fetch(
-        `https://us-central1-motionbit-doc.cloudfunctions.net/api/getDocuments?collectionName=NEWS&order=createdAt`
+        `${process.env.REACT_APP_SERVER_URL}/api/getDocuments?collectionName=NEWS&order=createdAt`
       )
         .then((response) => response.json())
         .then((data) => {
@@ -112,7 +115,7 @@ function CommunityList(props) {
           data.forEach(async (news) => {
             console.log(news);
             fetch(
-              `https://us-central1-motionbit-doc.cloudfunctions.net/api/getUserInfo?uid=${news.userId}`
+              `${process.env.REACT_APP_SERVER_URL}/api/getUserInfo?uid=${news.userId}`
             )
               .then((response) => response.json())
               .then((result) => {

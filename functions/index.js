@@ -20,8 +20,26 @@ const os = require("os");
 const fs = require("fs");
 const cors = require("cors");
 
-// Firebase Admin SDK 초기화
-admin.initializeApp();
+// Firebase Admin SDK 초기화 - private key는 따로 보관할 것
+const serviceAccount = {
+  type: "service_account",
+  project_id: "motionbit-doc",
+  private_key_id: "3088f06c46006361d9451ff31de2e60a65856302",
+  private_key:
+    "-----BEGIN PRIVATE KEY-----\nMIIEuwIBADANBgkqhkiG9w0BAQEFAASCBKUwggShAgEAAoIBAQCo1hiJiPkbuzsX\n2IkiM1beA7zYRe6LqmP8sDDF2sSg20J9rupLshF8gVgYEY6m8F8BnOuWZZT/f0bI\na8bhMI4EoyZv62UNTz7TZCtcWPadpNwO0ZbBiP7dnqxOmgHIyqf+Ylj+35DRz9g0\nccoddWoXnz2PuDcJcqY/3JL2k9u/D9jh8t1gNeLIYMDl4MmtTzaq8/itsBaLJxjJ\ngTn6M5XjOQO4iAoPDa3HUiUaCr6IqoRZvR5qoxG+sPPdHhkcOySpc4zUArweqnjQ\nY835s/N1/nKnEpT0p3zkpM0x7Q4k9FUgrVROqpwDPPFy/O/AwVxR9RbTF5drdkpQ\nnfMQbg6dAgMBAAECgf8MAy+XK8xEY7J1Nrv4xUCf1FsbUUwno8ELuX11uuQd+3ut\nUPt/Hhn71BOCx3Pe2oR6PXkX3tk7C1M0yr9t/Riv8qKSnRqlxX2gjLbSNqbC/lM8\nKGQ2F8AKclH0s24j7Wvh5GaVKXd/vze1FdE5R1gyw8ZCGBAbibFKbDBRyKEQwASA\ncjtUK80GvqL26GVL5WQ4XF8tVpL467sMzMAVTVjTu8NAMXSNl195a9aKuClVDUOi\nOh2yXilWi/ZuVY7cP0s2JbCPsPe9Kketj5HTj/OA8TmXbGMhKuKVrKY3OsxYxl9h\nvLLDKZRa4AznoQK3jLP38IbWoQlovcv8cz6EM+8CgYEA4UfGz67vGspJzyhkXlN1\n1aE/N90newquHShzNuvWJ+iWl2VhUXj5DD+bB7zHs/dSZmW1DTFVxXGd+Hnp/CGo\nvZLg3fTigkO2vp9RfWxP7CiUJ71HYQtUfEdPEADZe7Y13h3KHNrrEs8uiVTzcUA1\n/n9mwq2AxhSYcOzTUk6p888CgYEAv9vvjFZH+Grgc1FxVWfRt7/ipSz0gw8ZxNLS\nk0HU350krMw97VgvxcDR2Jy0o3E7p+UYotwqJUQf0oozQ2e5Zaj4drunWPQws1x4\nPxANzifCb5VjGA+1LkMmR0TZJfA54DqRxwVERLEt2qUNsdwPADPwx7T38e6QqgT2\nkyvr9dMCgYB+D803sDtKcYIl8wNfKTLaDXYzy4RpPMu7s0PtqsDW6jdCls+DaL9s\nVDdrd/8EPNSWSjmrHT1S1EZCoe4GUct78bH1YjBSFpQvTTWriq2aiAaHykokCtQH\nC1w5p1AMAyVXmrHbvcEncFopLSlg6T6NoDsfmzlhHmtDXbLO7wf5TwKBgCftlqnn\nHu1FGNcHAQYcKBoMlhd4Bp7r2poKogZBchLjekl36/9kFfUaztE8s588JoUneXwT\nQ7YjulevqUGC6aONib/0B7zMfQIm4WOGbMkVnzJnrYrJYhRxpxq36lUp7HGM3t/D\nadS95uQU64ezW2/YX2jAccVot7SaedJhFqc/AoGBAMgsqemjUwOzU1XQwiBXf9Tl\nWPorlMsvxRTHBY0r7GR/eFjvI2GDgOI1ODvqEhxVJ0hv+lpIn609sXNxqW67Tg0O\nTODS1CK3pVNecmoIwZaPJ+/+utVpsQ38/ZQ5whi5YKYlStql9rnfxPvnHId/A8mU\njPbjChzjE2s57kiXuDPd\n-----END PRIVATE KEY-----\n",
+  client_email: "firebase-adminsdk-8tpfb@motionbit-doc.iam.gserviceaccount.com",
+  client_id: "108688383191826501975",
+  auth_uri: "https://accounts.google.com/o/oauth2/auth",
+  token_uri: "https://oauth2.googleapis.com/token",
+  auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs",
+  client_x509_cert_url:
+    "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-8tpfb%40motionbit-doc.iam.gserviceaccount.com",
+  universe_domain: "googleapis.com",
+};
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
 const db = admin.firestore();
 const auth = admin.auth();
 
@@ -41,9 +59,9 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 // Firebase Authentication 에뮬레이터 설정
-if (process.env.FUNCTIONS_EMULATOR) {
-  process.env.FIREBASE_AUTH_EMULATOR_HOST = "localhost:9099";
-}
+// if (process.env.FUNCTIONS_EMULATOR) {
+//   process.env.FIREBASE_AUTH_EMULATOR_HOST = "localhost:9098";
+// }
 
 // Create and deploy your first functions
 // https://firebase.google.com/docs/functions/get-started
@@ -327,13 +345,11 @@ app.post("/addCoupon", async (req, res) => {
     const docRef = await subCollectionRef.doc(req.body.code).set(documentData);
 
     // 성공적으로 문서가 저장되었음을 응답
-    res
-      .status(200)
-      .send({
-        id: docRef.id,
-        message: "Document successfully saved.",
-        data: documentData,
-      });
+    res.status(200).send({
+      id: docRef.id,
+      message: "Document successfully saved.",
+      data: documentData,
+    });
   } catch (error) {
     console.error("Error saving document:", error);
     res.status(500).send("Error saving document");
@@ -424,7 +440,7 @@ app.get("/getUserInfo", async (req, res) => {
 
   try {
     // UID를 사용해 Firebase Auth에서 사용자 정보 가져오기
-    const userRecord = await admin.auth().getUser(uid);
+    const userRecord = await auth.getUser(uid);
 
     // 사용자 정보 반환
     res.status(200).send(userRecord);
@@ -435,6 +451,7 @@ app.get("/getUserInfo", async (req, res) => {
 });
 
 app.get("/getDocuments", async (req, res) => {
+  console.log("getDocuments");
   try {
     const { collectionName, order, page, limit } = req.query; // 쿼리 파라미터에서 페이지와 개수 가져오기
 

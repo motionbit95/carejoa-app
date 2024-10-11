@@ -36,7 +36,7 @@ function CounselView(props) {
     const getCounsel = async (counselId) => {
       console.log(counselId);
       fetch(
-        `http://127.0.0.1:5004/motionbit-doc/us-central1/getCounsel?counselId=${counselId}`
+        `${process.env.REACT_APP_SERVER_URL}/getCounsel?counselId=${counselId}`
       )
         .then((response) => response.json())
         .then((data) => {

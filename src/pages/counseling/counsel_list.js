@@ -43,9 +43,7 @@ function CounselList(props) {
     const getMyCounsels = async () => {
       const userId = "test";
 
-      fetch(
-        `http://127.0.0.1:5004/motionbit-doc/us-central1/getCounsels?userId=${userId}`
-      )
+      fetch(`${process.env.REACT_APP_SERVER_URL}/getCounsels?userId=${userId}`)
         .then((response) => response.json())
         .then((data) => {
           console.log(
@@ -70,7 +68,7 @@ function CounselList(props) {
     console.log(id);
     if (window.confirm("상담지를 삭제하시겠습니까?")) {
       fetch(
-        `https://us-central1-motionbit-doc.cloudfunctions.net/api/deleteDocument?subCollection=COUNSELING&documentId=${id}`
+        `${process.env.REACT_APP_SERVER_URL}/api/deleteDocument?subCollection=COUNSELING&documentId=${id}`
       )
         .then((response) => response.json())
         .then((data) => {

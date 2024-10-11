@@ -113,7 +113,7 @@ function Search(props) {
   useEffect(() => {
     const getUser = async (uid) => {
       fetch(
-        `http://127.0.0.1:5004/motionbit-doc/us-central1/getDocument?collection=USERS&docId=${uid}`
+        `${process.env.REACT_APP_SERVER_URL}/getDocument?collection=USERS&docId=${uid}`
       )
         .then((response) => response.json())
         .then((data) => {
@@ -350,7 +350,7 @@ function Search(props) {
 
                 // 시설현황 가지고 오기
                 fetch(
-                  `http://127.0.0.1:5004/motionbit-doc/us-central1/getFacilityGeneral?longTermAdminSym=${longTermAdminSym}`
+                  `${process.env.REACT_APP_SERVER_URL}/getFacilityGeneral?longTermAdminSym=${longTermAdminSym}`
                 )
                   .then((response) => response.json())
                   .then((result) => {
@@ -413,7 +413,7 @@ function Search(props) {
     console.log(temp);
 
     fetch(
-      `https://us-central1-motionbit-doc.cloudfunctions.net/api/updateDocument?subCollection=USERS&documentId=${auth.currentUser.uid}`,
+      `${process.env.REACT_APP_SERVER_URL}/api/updateDocument?subCollection=USERS&documentId=${auth.currentUser.uid}`,
       {
         method: "POST",
         headers: {

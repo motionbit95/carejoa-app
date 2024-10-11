@@ -37,7 +37,7 @@ function MyPage(props) {
     });
   }, []);
   return (
-    <Stack>
+    <Stack minH={"100vh"}>
       <Stack
         position={"sticky"}
         top={0}

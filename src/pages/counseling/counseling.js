@@ -163,7 +163,7 @@ function Counseling(props) {
     const subCollection = "COUNSELING";
 
     fetch(
-      `http://127.0.0.1:5004/motionbit-doc/us-central1/saveDocument?subCollection=${subCollection}`,
+      `${process.env.REACT_APP_SERVER_URL}/saveDocument?subCollection=${subCollection}`,
       {
         method: "POST",
         headers: {

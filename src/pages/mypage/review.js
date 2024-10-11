@@ -19,9 +19,7 @@ function Review(props) {
 
   useEffect(() => {
     const getReviews = () => {
-      fetch(
-        `https://us-central1-motionbit-doc.cloudfunctions.net/api/getReviews?uid=${uid}`
-      )
+      fetch(`${process.env.REACT_APP_SERVER_URL}/api/getReviews?uid=${uid}`)
         .then((response) => response.json())
         .then((data) => {
           setMyReviews(data);
@@ -35,7 +33,7 @@ function Review(props) {
   const deleteReview = (id) => {
     if (window.confirm("리뷰를 삭제하시겠습니까?")) {
       fetch(
-        `https://us-central1-motionbit-doc.cloudfunctions.net/api/deleteDocument?subCollection=REVIEWS&documentId=${id}`
+        `${process.env.REACT_APP_SERVER_URL}/api/deleteDocument?subCollection=REVIEWS&documentId=${id}`
       )
         .then((response) => response.json())
         .then((data) => {

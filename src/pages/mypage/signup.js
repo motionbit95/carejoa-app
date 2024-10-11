@@ -87,7 +87,7 @@ function SignUp(props) {
           console.log("profile updated");
         });
 
-        fetch("http://127.0.0.1:5004/motionbit-doc/us-central1/addUser", {
+        fetch("${process.env.REACT_APP_SERVER_URL}/addUser", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

@@ -83,7 +83,7 @@ function Setting(props) {
 
       console.log(fileData);
 
-      fetch(`http://127.0.0.1:5004/motionbit-doc/us-central1/uploadFiles`, {
+      fetch(`${process.env.REACT_APP_SERVER_URL}/uploadFiles`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -155,7 +155,7 @@ function Setting(props) {
     try {
       console.log(auth.currentUser.uid);
       const response = await fetch(
-        "https://us-central1-motionbit-doc.cloudfunctions.net/api/deleteUser",
+        "${process.env.REACT_APP_SERVER_URL}/api/deleteUser",
         {
           method: "POST",
           headers: {

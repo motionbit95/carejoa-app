@@ -21,7 +21,7 @@ function Goods(props) {
     console.log(location.state.uid);
     const getUser = async (uid) => {
       fetch(
-        `http://127.0.0.1:5004/motionbit-doc/us-central1/getDocument?collection=USERS&docId=${uid}`
+        `${process.env.REACT_APP_SERVER_URL}/getDocument?collection=USERS&docId=${uid}`
       )
         .then((response) => response.json())
         .then((data) => {
@@ -70,7 +70,7 @@ function Goods(props) {
     setGoodsList([...goodsList]);
 
     fetch(
-      `https://us-central1-motionbit-doc.cloudfunctions.net/api/updateDocument?subCollection=USERS&documentId=${location.state.uid}`,
+      `${process.env.REACT_APP_SERVER_URL}/api/updateDocument?subCollection=USERS&documentId=${location.state.uid}`,
       {
         method: "POST",
         headers: {

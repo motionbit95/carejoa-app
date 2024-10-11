@@ -79,7 +79,9 @@ function CommunityRegister(props) {
       // console.log(Date.now());
 
       fetch(
-        `http://127.0.0.1:5004/motionbit-doc/us-central1/saveDocument?subCollection=${path.toUpperCase()}`,
+        `${
+          process.env.REACT_APP_SERVER_URL
+        }/saveDocument?subCollection=${path.toUpperCase()}`,
         {
           method: "POST",
           headers: {
@@ -128,7 +130,7 @@ function CommunityRegister(props) {
       })
     );
 
-    fetch(`http://127.0.0.1:5004/motionbit-doc/us-central1/uploadFiles`, {
+    fetch(`${process.env.REACT_APP_SERVER_URL}/uploadFiles`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
