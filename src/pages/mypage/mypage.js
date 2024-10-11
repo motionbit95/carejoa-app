@@ -175,13 +175,13 @@ function MyPage(props) {
           <Stack spacing={4}>
             <Heading size={"md"}>고객센터</Heading>
             <HStack justifyContent={"space-between"}>
-              <Text>공지사항</Text>
+              <Text>공지사항 / 이벤트</Text>
               <Icon as={FiChevronRight} />
             </HStack>
-            <HStack justifyContent={"space-between"}>
+            {/* <HStack justifyContent={"space-between"}>
               <Text>이벤트</Text>
               <Icon as={FiChevronRight} />
-            </HStack>
+            </HStack> */}
             <HStack justifyContent={"space-between"}>
               <Text>FAQ</Text>
               <Icon as={FiChevronRight} />

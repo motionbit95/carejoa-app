@@ -7,6 +7,8 @@ import {
   FormLabel,
   HStack,
   Input,
+  InputGroup,
+  InputRightAddon,
   Stack,
   StackDivider,
   Text,
@@ -23,6 +25,7 @@ import {
   updatePassword,
   updateProfile,
 } from "firebase/auth";
+import PortOne from "@portone/browser-sdk/v2";
 
 function Setting(props) {
   const navigate = useNavigate();
@@ -49,6 +52,7 @@ function Setting(props) {
           name: user.displayName,
           email: user.email,
           photoURL: user.photoURL,
+          phoneNumber: user.phoneNumber,
         });
       }
     });
@@ -179,6 +183,51 @@ function Setting(props) {
     }
   };
 
+  const callPortOne = async () => {
+    const identityVerificationId = `${crypto.randomUUID().replaceAll("-", "")}`;
+    const response = await PortOne.requestIdentityVerification({
+      // 고객사 storeId로 변경해주세요.
+      storeId: "store-dabf3226-1f5c-437a-bf2b-c52b59f66bc6",
+      identityVerificationId: identityVerificationId,
+      // 연동 정보 메뉴의 채널 관리 탭에서 확인 가능합니다.
+      channelKey: "channel-key-b6ee4271-72a7-44a3-8edc-4d7a64b3675a",
+    });
+
+    // 프로세스가 제대로 완료되지 않은 경우 에러 코드가 존재합니다
+    if (response.code != null) {
+      return alert(response.message);
+    }
+
+    const verificationResult = await fetch(
+      `${process.env.REACT_APP_SERVER_URL}/api/identity-verifications`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "text/plain" },
+        body: JSON.stringify(response),
+      }
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+        if (data.status === "VERIFIED") {
+          setFormData({
+            ...formData,
+            phoneNumber: data.verifiedCustomer.phoneNumber,
+          });
+
+          updateProfile(auth.currentUser, {
+            // displayName: data.verifiedCustomer.name,
+            phoneNumber: data.verifiedCustomer.phoneNumber,
+          }).then(() => {
+            console.log("phone number updated", auth.currentUser.phoneNumber);
+          });
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  };
+
   return (
     <Stack>
       <Stack position={"sticky"} top={0} left={0} right={0} spacing={0}>
@@ -216,6 +265,25 @@ function Setting(props) {
             <FormHelperText textAlign={"right"}>
               {formData.name ? formData.name?.length : 0} / 20
             </FormHelperText>
+          </FormControl>
+          <FormControl>
+            <FormLabel>휴대폰</FormLabel>
+            <HStack>
+              <Input
+                isReadOnly
+                placeholder="휴대폰 번호를 입력해주세요."
+                type="tel"
+                value={formData.phoneNumber}
+                variant={"flushed"}
+                maxLength={20}
+                onChange={(e) =>
+                  setFormData({ ...formData, phoneNumber: e.target.value })
+                }
+              />
+              <Button onClick={callPortOne}>
+                {formData.phoneNumber ? "재인증" : "본인인증"}
+              </Button>
+            </HStack>
           </FormControl>
           <FormControl>
             <FormLabel>이메일</FormLabel>

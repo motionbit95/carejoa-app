@@ -602,7 +602,7 @@ app.get("/getReviews", async (req, res) => {
   }
 });
 
-// POST 요청을 받는 /payments/complete
+// POST 요청을 받는 /payment/complete
 app.post("/payment/complete", async (req, res) => {
   try {
     // 요청의 body로 paymentId가 오기를 기대합니다.
@@ -702,6 +702,48 @@ app.post("/payment/complete", async (req, res) => {
   } catch (e) {
     // 결제 검증에 실패했습니다.
     res.status(400).send(e);
+  }
+});
+
+// "/identity-verifications"에 대한 POST 요청을 처리하는 controller
+app.post("/identity-verifications", async (req, res) => {
+  // request의 body에서 identityVerificationId 추출
+
+  const { identityVerificationId } = JSON.parse(req.body);
+
+  console.log(
+    `https://api.portone.io/identity-verifications/${encodeURIComponent(
+      identityVerificationId
+    )}`
+  );
+
+  try {
+    // 포트원 본인인증 내역 단건조회 API 호출
+    const verificationResponse = await fetch(
+      `https://api.portone.io/identity-verifications/${encodeURIComponent(
+        identityVerificationId
+      )}`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization:
+            "PortOne wf9C8KsJJ63Pvt3Jnl2uloC2ya1t5UvF3Q3pJFUYL2gNKoHE6b8UVQTjvTdxmO8UxnHsg2f87oK9bAUP",
+        },
+      }
+    );
+    if (!verificationResponse.ok)
+      throw new Error(
+        `verificationResponse: ${await verificationResponse.json()}`
+      );
+    const identityVerification = await verificationResponse.json();
+    if (identityVerification.status !== "VERIFIED") {
+      // 인증 실패
+    }
+
+    console.log(identityVerification);
+    res.status(200).send(identityVerification);
+  } catch (e) {
+    console.error(e);
   }
 });
 
