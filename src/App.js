@@ -27,6 +27,7 @@ import Review from "./pages/mypage/review";
 import Detail from "./pages/search/detail";
 import Goods from "./pages/mypage/goods";
 import MapSearch from "./pages/search/map_search";
+import Store from "./pages/mypage/store";
 
 function App() {
   return (
@@ -55,6 +56,8 @@ function App() {
               <Route path="/signup" element={<SignUp />} />
               <Route path="/find/*" element={<Find />} />
               <Route path="/mypage/setting" element={<Setting />} />
+
+              <Route path="/store" element={<Store />} />
             </Routes>
           </BrowserRouter>
         </Container>

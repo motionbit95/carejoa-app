@@ -117,7 +117,11 @@ function MyPage(props) {
           {/* 이용내역 */}
           <Stack spacing={4}>
             <Heading size={"md"}>조아 캐시</Heading>
-            <HStack justifyContent={"space-between"}>
+            <HStack
+              justifyContent={"space-between"}
+              cursor={"pointer"}
+              onClick={() => navigate("/store")}
+            >
               <Text>스토어</Text>
               <Icon as={FiChevronRight} />
             </HStack>
