@@ -22,7 +22,7 @@ function Find(props) {
       });
   };
   return (
-    <Stack>
+    <Stack minH={"100vh"} spacing={0} bgColor={"gray.50"}>
       <Stack>
         <Header title={"비밀번호 재설정"} customButton={<></>} />
       </Stack>

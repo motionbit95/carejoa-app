@@ -1,5 +1,6 @@
 import {
   Avatar,
+  Badge,
   Button,
   Circle,
   Flex,
@@ -16,13 +17,16 @@ import { FiChevronRight, FiUser } from "react-icons/fi";
 import { RiCoupon2Fill } from "react-icons/ri";
 import Header from "../../component/header";
 import BottomNavigation from "../../component/bottom_nav";
-import { auth } from "../../firebase/config";
+import { auth, db } from "../../firebase/config";
 import { useNavigate } from "react-router-dom";
+import { doc, onSnapshot } from "firebase/firestore";
+import { onAuthStateChanged } from "firebase/auth";
 
 function MyPage(props) {
   const navigate = useNavigate();
   const [state, setState] = React.useState({ isLogin: false });
   const [user, setUser] = React.useState(null);
+  const [data, setData] = React.useState(null);
   useEffect(() => {
     auth.onAuthStateChanged((user) => {
       if (!user) {
@@ -36,6 +40,29 @@ function MyPage(props) {
       }
     });
   }, []);
+
+  useEffect(() => {
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // 상위 문서와 하위 문서 참조
+        const docRef = doc(db, "database", "carejoa", "USERS", user.uid);
+
+        // 특정 문서에 대한 실시간 구독
+        const unsubscribe = onSnapshot(docRef, (snapshot) => {
+          if (snapshot.exists()) {
+            console.log("Document data:", snapshot.data());
+            setData({ id: snapshot.id, ...snapshot.data() });
+          } else {
+            console.log("No such document!");
+          }
+        });
+
+        // 컴포넌트 언마운트 시 구독 해제
+        return () => unsubscribe();
+      }
+    });
+  }, []);
+
   return (
     <Stack minH={"100vh"}>
       <Stack
@@ -57,9 +84,18 @@ function MyPage(props) {
               <HStack>
                 <Avatar size={"lg"} src={user?.photoURL} />
                 <Stack w={"full"} spacing={1}>
-                  <Text fontSize={"lg"} fontWeight={"bold"}>
-                    {user?.displayName}
-                  </Text>
+                  <HStack>
+                    <Badge
+                      colorScheme={
+                        data?.type === "personal" ? "blue" : "yellow"
+                      }
+                    >
+                      {data?.type === "personal" ? "개인" : "기업"}
+                    </Badge>
+                    <Text fontSize={"lg"} fontWeight={"bold"}>
+                      {user?.displayName}
+                    </Text>
+                  </HStack>
                   <Text color={"gray.500"} fontSize={"sm"}>
                     {user?.email}
                   </Text>
@@ -75,7 +111,7 @@ function MyPage(props) {
               borderRadius={4}
               justifyContent={"space-between"}
               cursor={"pointer"}
-              onClick={() => console.log("test")}
+              onClick={() => navigate("/coupon")}
             >
               <HStack>
                 <Icon as={RiCoupon2Fill} />
@@ -125,7 +161,11 @@ function MyPage(props) {
               <Text>스토어</Text>
               <Icon as={FiChevronRight} />
             </HStack>
-            <HStack justifyContent={"space-between"}>
+            <HStack
+              justifyContent={"space-between"}
+              cursor={"pointer"}
+              onClick={() => navigate("/payment")}
+            >
               <Text>충전 / 사용 내역</Text>
               <Icon as={FiChevronRight} />
             </HStack>

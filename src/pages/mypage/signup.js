@@ -87,7 +87,7 @@ function SignUp(props) {
           console.log("profile updated");
         });
 
-        fetch("${process.env.REACT_APP_SERVER_URL}/addUser", {
+        fetch(`${process.env.REACT_APP_SERVER_URL}/addUser`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

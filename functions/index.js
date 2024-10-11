@@ -405,6 +405,33 @@ app.get("/getCoupon", async (req, res) => {
   }
 });
 
+app.get("/getPaymentList", async (req, res) => {
+  const userId = "carejoa"; // 예시: 'carejoa'
+  const subCollection = "PAYMENTS"; // 예시: 'request'
+
+  const { uid } = req.query;
+
+  console.log(userId, subCollection, uid);
+
+  try {
+    // 특정 사용자의 하위 컬렉션 참조
+    const subCollectionRef = db
+      .collection("database")
+      .doc(userId)
+      .collection(subCollection)
+      // .orderBy("paidAt", "asc")
+      .where("uid", "==", uid);
+    // 새 문서를 가져오기
+    const documents = await subCollectionRef.get();
+    const paymentList = documents.docs.map((doc) => doc.data());
+
+    return res.status(200).json(paymentList);
+  } catch (error) {
+    console.error("Error fetching documents:", error);
+    return res.status(500).json({ error: error.message });
+  }
+});
+
 // Firebase Function: POST 요청을 통해 유저 삭제
 app.post("/deleteUser", async (req, res) => {
   console.log("deleteUser", req.body.uid);
@@ -572,6 +599,109 @@ app.get("/getReviews", async (req, res) => {
   } catch (error) {
     console.error("Error fetching documents:", error);
     return res.status(500).json({ error: error.message });
+  }
+});
+
+// POST 요청을 받는 /payments/complete
+app.post("/payment/complete", async (req, res) => {
+  try {
+    // 요청의 body로 paymentId가 오기를 기대합니다.
+    const { paymentId, amount, uid, cash } = JSON.parse(req.body);
+
+    console.log(paymentId, amount, uid, cash);
+
+    // console.log(
+    //   amount,
+    //   `https://api.portone.io/payments/${encodeURIComponent(paymentId)}`
+    // );
+
+    // 1. 포트원 결제내역 단건조회 API 호출
+    const paymentResponse = await fetch(
+      `https://api.portone.io/payments/${encodeURIComponent(paymentId)}`,
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `PortOne wf9C8KsJJ63Pvt3Jnl2uloC2ya1t5UvF3Q3pJFUYL2gNKoHE6b8UVQTjvTdxmO8UxnHsg2f87oK9bAUP`,
+        },
+      }
+    );
+    if (!paymentResponse.ok) {
+      throw new Error(`paymentResponse: ${await paymentResponse.json()}`);
+    }
+    const payment = await paymentResponse.json();
+
+    // console.log("payment", payment);
+
+    // 2. 고객사 내부 주문 데이터의 가격과 실제 지불된 금액을 비교합니다.
+
+    // console.log("결제", payment.amount.total, amount);
+    if (payment.amount.total === amount) {
+      switch (payment.status) {
+        case "VIRTUAL_ACCOUNT_ISSUED": {
+          const paymentMethod = payment.paymentMethod;
+          // 가상 계좌가 발급된 상태입니다.
+          // 계좌 정보를 이용해 원하는 로직을 구성하세요.
+          break;
+        }
+        case "PAID": {
+          // 모든 금액을 지불했습니다! 완료 시 원하는 로직을 구성하세요.
+
+          // 1. payment 데이터를 저장합니다.
+          try {
+            // 특정 사용자의 하위 컬렉션 참조
+            const docRef = db
+              .collection("database")
+              .doc("carejoa")
+              .collection("PAYMENTS")
+              .doc(paymentId);
+
+            await docRef.set(
+              { ...payment, uid: uid, cash: cash },
+              { merge: true }
+            );
+
+            // 성공적으로 문서가 저장되었음을 응답
+            console.log({ message: "Payment Document successfully saved." });
+          } catch (error) {
+            console.error("Error saving document:", error);
+            res.status(500).send("Error saving document");
+          }
+
+          // 2. 유저 캐시 업데이트
+          try {
+            // 특정 사용자의 하위 컬렉션 참조
+            const docRef = db
+              .collection("database")
+              .doc("carejoa")
+              .collection("USERS")
+              .doc(uid);
+
+            const userInfo = (await docRef.get()).data();
+
+            console.log("USER DATA : ", userInfo);
+            // 문서를 변경합니다.
+            await docRef.update(
+              { cash: (userInfo.cash || 0) + cash },
+              { merge: true }
+            );
+
+            // 성공적으로 문서가 변경되었음을 응답
+            console.log({ message: "USER Document successfully updated." });
+          } catch (error) {
+            console.error("Error updating document:", error);
+            // res.status(500).send("Error updating document");
+          }
+
+          res.status(200).send(payment);
+          break;
+        }
+      }
+    } else {
+      // 결제 금액이 불일치하여 위/변조 시도가 의심됩니다.
+    }
+  } catch (e) {
+    // 결제 검증에 실패했습니다.
+    res.status(400).send(e);
   }
 });
 

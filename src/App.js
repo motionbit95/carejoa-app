@@ -28,6 +28,9 @@ import Detail from "./pages/search/detail";
 import Goods from "./pages/mypage/goods";
 import MapSearch from "./pages/search/map_search";
 import Store from "./pages/mypage/store";
+import Coupon from "./pages/mypage/coupon";
+import Result from "./pages/mypage/result";
+import Payment from "./pages/mypage/payment";
 
 function App() {
   return (
@@ -58,6 +61,9 @@ function App() {
               <Route path="/mypage/setting" element={<Setting />} />
 
               <Route path="/store" element={<Store />} />
+              <Route path="/result" element={<Result />} />
+              <Route path="/coupon" element={<Coupon />} />
+              <Route path="/payment" element={<Payment />} />
             </Routes>
           </BrowserRouter>
         </Container>

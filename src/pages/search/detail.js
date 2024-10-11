@@ -556,7 +556,7 @@ function Detail(props) {
                         fontWeight={"bold"}
                         color={"blue.500"}
                       >
-                        {parseInt(data.curAmt?.text).toLocaleString()}원
+                        {parseInt(data.curAmt?.text)?.toLocaleString()}원
                       </Text>
                     </Stack>
                   );

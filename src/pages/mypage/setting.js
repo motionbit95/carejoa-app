@@ -155,7 +155,7 @@ function Setting(props) {
     try {
       console.log(auth.currentUser.uid);
       const response = await fetch(
-        "${process.env.REACT_APP_SERVER_URL}/api/deleteUser",
+        `${process.env.REACT_APP_SERVER_URL}/api/deleteUser`,
         {
           method: "POST",
           headers: {
